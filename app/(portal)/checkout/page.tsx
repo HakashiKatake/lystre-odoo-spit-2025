@@ -89,6 +89,18 @@ export default function CheckoutPage() {
 
     setIsProcessing(true)
     try {
+      // First, update the customer's address
+      await fetch(`/api/contacts/${user.contactId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          street: address.street,
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode,
+        }),
+      })
+
       // Create the sale order via API
       const orderItems = items.map((item) => ({
         productId: item.productId,
@@ -236,7 +248,7 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <label
                   className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
-                    paymentMethod === 'card' ? 'border-[var(--primary)] bg-[var(--primary)] bg-opacity-5' : ''
+                    paymentMethod === 'card' ? 'border-amber-600 bg-amber-50' : 'bg-white hover:bg-gray-50'
                   }`}
                 >
                   <input
@@ -245,17 +257,18 @@ export default function CheckoutPage() {
                     value="card"
                     checked={paymentMethod === 'card'}
                     onChange={() => setPaymentMethod('card')}
+                    className="accent-amber-600"
                   />
-                  <CreditCard size={24} className="text-[var(--primary)]" />
+                  <CreditCard size={24} className="text-amber-600" />
                   <div>
-                    <p className="font-medium">Credit/Debit Card</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">Pay securely with your card</p>
+                    <p className="font-medium text-gray-900">Credit/Debit Card</p>
+                    <p className="text-sm text-gray-500">Pay securely with your card</p>
                   </div>
                 </label>
 
                 <label
                   className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
-                    paymentMethod === 'upi' ? 'border-[var(--primary)] bg-[var(--primary)] bg-opacity-5' : ''
+                    paymentMethod === 'upi' ? 'border-amber-600 bg-amber-50' : 'bg-white hover:bg-gray-50'
                   }`}
                 >
                   <input
@@ -264,17 +277,18 @@ export default function CheckoutPage() {
                     value="upi"
                     checked={paymentMethod === 'upi'}
                     onChange={() => setPaymentMethod('upi')}
+                    className="accent-amber-600"
                   />
-                  <Wallet size={24} className="text-[var(--primary)]" />
+                  <Wallet size={24} className="text-amber-600" />
                   <div>
-                    <p className="font-medium">UPI</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">Pay using UPI apps</p>
+                    <p className="font-medium text-gray-900">UPI</p>
+                    <p className="text-sm text-gray-500">Pay using UPI apps</p>
                   </div>
                 </label>
 
                 <label
                   className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
-                    paymentMethod === 'netbanking' ? 'border-[var(--primary)] bg-[var(--primary)] bg-opacity-5' : ''
+                    paymentMethod === 'netbanking' ? 'border-amber-600 bg-amber-50' : 'bg-white hover:bg-gray-50'
                   }`}
                 >
                   <input
@@ -283,17 +297,18 @@ export default function CheckoutPage() {
                     value="netbanking"
                     checked={paymentMethod === 'netbanking'}
                     onChange={() => setPaymentMethod('netbanking')}
+                    className="accent-amber-600"
                   />
-                  <Building size={24} className="text-[var(--primary)]" />
+                  <Building size={24} className="text-amber-600" />
                   <div>
-                    <p className="font-medium">Net Banking</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">Pay through your bank</p>
+                    <p className="font-medium text-gray-900">Net Banking</p>
+                    <p className="text-sm text-gray-500">Pay through your bank</p>
                   </div>
                 </label>
 
                 <label
                   className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
-                    paymentMethod === 'cod' ? 'border-[var(--primary)] bg-[var(--primary)] bg-opacity-5' : ''
+                    paymentMethod === 'cod' ? 'border-amber-600 bg-amber-50' : 'bg-white hover:bg-gray-50'
                   }`}
                 >
                   <input
@@ -302,11 +317,12 @@ export default function CheckoutPage() {
                     value="cod"
                     checked={paymentMethod === 'cod'}
                     onChange={() => setPaymentMethod('cod')}
+                    className="accent-amber-600"
                   />
-                  <ShoppingBag size={24} className="text-[var(--primary)]" />
+                  <ShoppingBag size={24} className="text-amber-600" />
                   <div>
-                    <p className="font-medium">Cash on Delivery</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">Pay when you receive</p>
+                    <p className="font-medium text-gray-900">Cash on Delivery</p>
+                    <p className="text-sm text-gray-500">Pay when you receive</p>
                   </div>
                 </label>
               </div>

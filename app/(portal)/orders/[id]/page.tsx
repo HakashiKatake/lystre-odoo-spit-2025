@@ -42,7 +42,7 @@ interface SaleOrder {
     email: string
     mobile?: string
   }
-  items: OrderItem[]
+  lines: OrderItem[]
   shippingAddress?: string
 }
 
@@ -154,7 +154,7 @@ export default function OrderDetailPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {order.items.map((item) => (
+                  {(order.lines || []).map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
                         <Link 
@@ -166,7 +166,7 @@ export default function OrderDetailPage() {
                       </TableCell>
                       <TableCell className="text-center">{item.quantity}</TableCell>
                       <TableCell className="text-right">{formatCurrency(item.unitPrice)}</TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(item.totalPrice)}</TableCell>
+                      <TableCell className="text-right font-medium">{formatCurrency(item.totalPrice || item.quantity * item.unitPrice)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

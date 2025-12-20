@@ -75,11 +75,10 @@ export default function NewDiscountOfferPage() {
 
     try {
       // First create the discount offer
-      const res = await fetch('/api/coupons', {
+      const res = await fetch('/api/discount-offers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'createOffer',
           name: formData.name,
           discountPercentage: formData.discountPercentage,
           startDate: formData.startDate,
@@ -91,6 +90,33 @@ export default function NewDiscountOfferPage() {
       const data = await res.json()
 
       if (data.success) {
+        // Optionally generate coupons after creating offer
+        const offerId = data.data.id
+        
+        if (generateOptions.forType === 'anonymous' && generateOptions.quantity > 0) {
+          await fetch('/api/coupons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'generateCoupons',
+              discountOfferId: offerId,
+              quantity: generateOptions.quantity,
+              expirationDate: generateOptions.expirationDate || formData.endDate,
+            }),
+          })
+        } else if (generateOptions.forType === 'selected' && generateOptions.selectedCustomers.length > 0) {
+          await fetch('/api/coupons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'generateCoupons',
+              discountOfferId: offerId,
+              customerIds: generateOptions.selectedCustomers,
+              expirationDate: generateOptions.expirationDate || formData.endDate,
+            }),
+          })
+        }
+        
         toast.success('Discount offer created successfully!')
         router.push('/admin/discount-offers')
       } else {

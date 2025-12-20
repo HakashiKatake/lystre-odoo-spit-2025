@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import crypto from 'crypto'
+
+// Generate coupon code
+function generateCouponCode(): string {
+    return crypto.randomBytes(4).toString('hex').toUpperCase()
+}
 
 // GET /api/coupons
 export async function GET(request: NextRequest) {
@@ -7,6 +13,7 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams
         const status = searchParams.get('status')
         const code = searchParams.get('code')
+        const includeAll = searchParams.get('includeAll')
 
         const where: Record<string, unknown> = {}
         if (status) where.status = status
@@ -19,6 +26,7 @@ export async function GET(request: NextRequest) {
                 discountOffer: true,
                 contact: true,
             },
+            take: includeAll ? undefined : 100,
         })
 
         return NextResponse.json({
@@ -34,10 +42,74 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST /api/coupons/validate
+// POST /api/coupons
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
+
+        // Check if this is for creating a discount offer
+        if (body.action === 'createOffer') {
+            const { name, discountPercentage, startDate, endDate, availableOn } = body
+
+            if (!name || !discountPercentage || !startDate || !endDate) {
+                return NextResponse.json(
+                    { success: false, message: 'Missing required fields for discount offer' },
+                    { status: 400 }
+                )
+            }
+
+            const offer = await prisma.discountOffer.create({
+                data: {
+                    name,
+                    discountPercentage: parseFloat(discountPercentage),
+                    startDate: new Date(startDate),
+                    endDate: new Date(endDate),
+                    availableOn: availableOn || 'WEBSITE',
+                },
+            })
+
+            return NextResponse.json({
+                success: true,
+                message: 'Discount offer created successfully',
+                data: offer,
+            }, { status: 201 })
+        }
+
+        // Check if this is for generating coupons for an offer
+        if (body.action === 'generateCoupons') {
+            const { discountOfferId, quantity, customerIds, expirationDate } = body
+
+            if (!discountOfferId) {
+                return NextResponse.json(
+                    { success: false, message: 'Discount offer ID is required' },
+                    { status: 400 }
+                )
+            }
+
+            const couponsToCreate = []
+            const numCoupons = customerIds?.length > 0 ? customerIds.length : (quantity || 1)
+
+            for (let i = 0; i < numCoupons; i++) {
+                couponsToCreate.push({
+                    code: generateCouponCode(),
+                    discountOfferId,
+                    contactId: customerIds?.[i] || null,
+                    expirationDate: expirationDate ? new Date(expirationDate) : null,
+                })
+            }
+
+            const coupons = await prisma.coupon.createMany({
+                data: couponsToCreate,
+            })
+
+            return NextResponse.json({
+                success: true,
+                message: `${coupons.count} coupons created successfully`,
+                data: { count: coupons.count },
+            }, { status: 201 })
+        }
+
+        // Default: Validate coupon
         const { code, customerId } = body
 
         if (!code) {
@@ -103,9 +175,9 @@ export async function POST(request: NextRequest) {
             message: `${coupon.discountOffer.discountPercentage}% discount will be applied!`,
         })
     } catch (error) {
-        console.error('Coupon validation error:', error)
+        console.error('Coupon operation error:', error)
         return NextResponse.json(
-            { success: false, message: 'Failed to validate coupon' },
+            { success: false, message: 'Failed to process coupon operation' },
             { status: 500 }
         )
     }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, Check } from 'lucide-react'
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, Check, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { useCartStore } from '@/lib/store'
 import { toast } from 'sonner'
@@ -14,21 +14,40 @@ export default function CartPage() {
   const { items, updateQuantity, removeItem, couponCode, discountAmount, setCoupon, removeCoupon, getSubtotal, getTaxAmount, getTotal } = useCartStore()
   const [couponInput, setCouponInput] = useState('')
   const [couponError, setCouponError] = useState('')
+  const [validatingCoupon, setValidatingCoupon] = useState(false)
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) {
+      setCouponError('Please enter a coupon code')
+      return
+    }
+
     setCouponError('')
-    
-    // Mock coupon validation
-    if (couponInput.toUpperCase() === 'SAVE10') {
-      const discount = getSubtotal() * 0.1
-      setCoupon('SAVE10', discount)
-      toast.success('10% discount applied!')
-    } else if (couponInput.toUpperCase() === 'FLAT500') {
-      setCoupon('FLAT500', 500)
-      toast.success('₹500 discount applied!')
-    } else {
-      setCouponError('Invalid coupon code')
-      toast.error('Invalid coupon code')
+    setValidatingCoupon(true)
+
+    try {
+      const res = await fetch('/api/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput.toUpperCase() }),
+      })
+      
+      const data = await res.json()
+      
+      if (data.success && data.valid) {
+        const discount = getSubtotal() * (data.discountPercentage / 100)
+        setCoupon(couponInput.toUpperCase(), discount)
+        toast.success(data.message || `${data.discountPercentage}% discount applied!`)
+      } else {
+        setCouponError(data.message || 'Invalid coupon code')
+        toast.error(data.message || 'Invalid coupon code')
+      }
+    } catch (err) {
+      console.error('Coupon validation error:', err)
+      setCouponError('Failed to validate coupon')
+      toast.error('Failed to validate coupon')
+    } finally {
+      setValidatingCoupon(false)
     }
   }
 
@@ -212,15 +231,15 @@ export default function CartPage() {
                       placeholder="Discount Code..."
                       className="flex-1"
                     />
-                    <Button onClick={handleApplyCoupon} variant="outline">
-                      Apply
+                    <Button onClick={handleApplyCoupon} variant="outline" disabled={validatingCoupon}>
+                      {validatingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
                     </Button>
                   </div>
                   {couponError && (
                     <p className="text-red-600 text-sm mt-2">{couponError}</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-2">
-                    Try: SAVE10 or FLAT500
+                    Enter your coupon code from discount offers
                   </p>
                 </div>
               )}

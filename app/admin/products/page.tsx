@@ -18,6 +18,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface Product {
   id: string
@@ -27,13 +42,17 @@ interface Product {
   stock: number
   salesPrice: number
   published: boolean
+  status: string // new/confirmed/archived
 }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<'all' | 'published' | 'unpublished'>('all')
+  const [publishFilter, setPublishFilter] = useState<'all' | 'published' | 'unpublished'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'confirmed' | 'archived'>('all')
+  const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // Fetch products from API
   useEffect(() => {
@@ -57,13 +76,15 @@ export default function AdminProductsPage() {
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
-    const matchesFilter =
-      filter === 'all'
+    const matchesPublish =
+      publishFilter === 'all'
         ? true
-        : filter === 'published'
+        : publishFilter === 'published'
         ? p.published
         : !p.published
-    return matchesSearch && matchesFilter
+    const matchesStatus =
+      statusFilter === 'all' ? true : p.status === statusFilter
+    return matchesSearch && matchesPublish && matchesStatus
   })
 
   const togglePublish = async (id: string, currentStatus: boolean) => {
@@ -88,23 +109,57 @@ export default function AdminProductsPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
-    
+  const changeStatus = async (id: string, newStatus: string) => {
     try {
       const res = await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      const data = await res.json()
+      
+      if (data.success) {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
+        )
+        toast.success(`Product status changed to ${newStatus}!`)
+      } else {
+        toast.error(data.message || 'Failed to update product')
+      }
+    } catch {
+      toast.error('Failed to update product status')
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteProduct) return
+    setDeleting(true)
+    
+    try {
+      const res = await fetch(`/api/products/${deleteProduct.id}`, {
         method: 'DELETE',
       })
       const data = await res.json()
       
       if (data.success) {
-        setProducts((prev) => prev.filter((p) => p.id !== id))
+        setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id))
         toast.success('Product deleted!')
+        setDeleteProduct(null)
       } else {
         toast.error(data.message || 'Failed to delete product')
       }
     } catch {
       toast.error('Failed to delete product')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'default'
+      case 'archived': return 'secondary'
+      default: return 'outline'
     }
   }
 
@@ -145,24 +200,35 @@ export default function AdminProductsPage() {
                 className="pl-10"
               />
             </div>
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as 'all' | 'new' | 'confirmed' | 'archived')}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
               <Button
-                onClick={() => setFilter('all')}
-                variant={filter === 'all' ? 'default' : 'outline'}
+                onClick={() => setPublishFilter('all')}
+                variant={publishFilter === 'all' ? 'default' : 'outline'}
                 size="sm"
               >
                 All ({products.length})
               </Button>
               <Button
-                onClick={() => setFilter('published')}
-                variant={filter === 'published' ? 'default' : 'outline'}
+                onClick={() => setPublishFilter('published')}
+                variant={publishFilter === 'published' ? 'default' : 'outline'}
                 size="sm"
               >
                 Published ({products.filter(p => p.published).length})
               </Button>
               <Button
-                onClick={() => setFilter('unpublished')}
-                variant={filter === 'unpublished' ? 'default' : 'outline'}
+                onClick={() => setPublishFilter('unpublished')}
+                variant={publishFilter === 'unpublished' ? 'default' : 'outline'}
                 size="sm"
               >
                 Unpublished ({products.filter(p => !p.published).length})
@@ -181,6 +247,7 @@ export default function AdminProductsPage() {
                 <TableHead>Product Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead>Sales Price</TableHead>
                 <TableHead>Published</TableHead>
@@ -193,6 +260,23 @@ export default function AdminProductsPage() {
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell className="capitalize">{product.category}</TableCell>
                   <TableCell className="capitalize">{product.type}</TableCell>
+                  <TableCell>
+                    <Select 
+                      value={product.status || 'new'} 
+                      onValueChange={(v) => changeStatus(product.id, v)}
+                    >
+                      <SelectTrigger className="w-[110px] h-8">
+                        <Badge variant={getStatusVariant(product.status)} className="capitalize">
+                          {product.status || 'new'}
+                        </Badge>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>
                     {product.stock < 20 ? (
                       <Badge variant="destructive">{product.stock}</Badge>
@@ -223,7 +307,7 @@ export default function AdminProductsPage() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => setDeleteProduct(product)}
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -253,6 +337,31 @@ export default function AdminProductsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteProduct} onOpenChange={() => setDeleteProduct(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{deleteProduct?.name}&quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteProduct(null)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
