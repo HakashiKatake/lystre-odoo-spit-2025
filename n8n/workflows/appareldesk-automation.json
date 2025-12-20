@@ -1,0 +1,129 @@
+{
+    "name": "ApparelDesk Automation Workflows",
+    "nodes": [
+        {
+            "id": "1",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "position": [
+                250,
+                300
+            ],
+            "parameters": {
+                "path": "appareldesk",
+                "httpMethod": "POST"
+            }
+        },
+        {
+            "id": "2",
+            "name": "Route by Event",
+            "type": "n8n-nodes-base.switch",
+            "position": [
+                450,
+                300
+            ],
+            "parameters": {
+                "rules": {
+                    "rules": [
+                        {
+                            "value": "order.confirmed",
+                            "output": 0
+                        },
+                        {
+                            "value": "invoice.created",
+                            "output": 1
+                        },
+                        {
+                            "value": "payment.registered",
+                            "output": 2
+                        }
+                    ]
+                },
+                "dataPropertyName": "event"
+            }
+        },
+        {
+            "id": "3",
+            "name": "Send Order Confirmation Email",
+            "type": "n8n-nodes-base.emailSend",
+            "position": [
+                700,
+                200
+            ],
+            "parameters": {
+                "fromEmail": "orders@appareldesk.com",
+                "toEmail": "={{ $json.data.customerEmail }}",
+                "subject": "Order Confirmed - {{ $json.data.orderNumber }}",
+                "text": "Your order {{ $json.data.orderNumber }} has been confirmed!"
+            }
+        },
+        {
+            "id": "4",
+            "name": "Send Invoice Email",
+            "type": "n8n-nodes-base.emailSend",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "fromEmail": "billing@appareldesk.com",
+                "toEmail": "={{ $json.data.customerEmail }}",
+                "subject": "Invoice {{ $json.data.invoiceNumber }} - ApparelDesk",
+                "text": "Please find your invoice {{ $json.data.invoiceNumber }} attached."
+            }
+        },
+        {
+            "id": "5",
+            "name": "Send Payment Receipt",
+            "type": "n8n-nodes-base.emailSend",
+            "position": [
+                700,
+                400
+            ],
+            "parameters": {
+                "fromEmail": "payments@appareldesk.com",
+                "toEmail": "={{ $json.data.email }}",
+                "subject": "Payment Received - ₹{{ $json.data.amount }}",
+                "text": "Thank you for your payment of ₹{{ $json.data.amount }}."
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Route by Event",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Route by Event": {
+            "main": [
+                [
+                    {
+                        "node": "Send Order Confirmation Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Invoice Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Payment Receipt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

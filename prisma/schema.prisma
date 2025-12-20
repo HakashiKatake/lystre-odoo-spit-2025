@@ -1,0 +1,268 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============== ENUMS ==============
+
+enum UserRole {
+  INTERNAL
+  PORTAL
+}
+
+enum ContactType {
+  CUSTOMER
+  VENDOR
+  BOTH
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
+enum CouponStatus {
+  UNUSED
+  USED
+}
+
+enum DiscountAvailableOn {
+  SALES
+  WEBSITE
+}
+
+// ============== MODELS ==============
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         UserRole
+  mobile       String?
+  street       String?
+  city         String?
+  state        String?
+  pincode      String?
+  contactId    String?   @unique
+  contact      Contact?  @relation(fields: [contactId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Contact {
+  id               String            @id @default(cuid())
+  name             String
+  type             ContactType
+  email            String?
+  mobile           String?
+  street           String?
+  city             String?
+  state            String?
+  pincode          String?
+  user             User?
+  saleOrders       SaleOrder[]
+  purchaseOrders   PurchaseOrder[]
+  customerInvoices CustomerInvoice[]
+  vendorBills      VendorBill[]
+  coupons          Coupon[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Product {
+  id                 String              @id @default(cuid())
+  name               String
+  category           String // men/women/children
+  type               String // shirt/pant/kurta/tshirt/formals/jeans/hoodies/sarees/nightwear
+  material           String // cotton/nylon/polyester/wool
+  colors             String[] // multi-select
+  stock              Int                 @default(0)
+  salesPrice         Float
+  salesTax           Float               @default(0)
+  purchasePrice      Float
+  purchaseTax        Float               @default(0)
+  published          Boolean             @default(false)
+  images             String[]
+  status             String              @default("new") // new/confirmed/archived
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  saleOrderLines     SaleOrderLine[]
+  purchaseOrderLines PurchaseOrderLine[]
+}
+
+model PaymentTerm {
+  id                   String      @id @default(cuid())
+  name                 String
+  earlyPaymentDiscount Boolean     @default(false)
+  discountPercentage   Float?
+  discountDays         Int?
+  discountComputation  String? // base_amount/total_amount
+  examplePreview       String?
+  active               Boolean     @default(true)
+  saleOrders           SaleOrder[]
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+}
+
+model DiscountOffer {
+  id                 String              @id @default(cuid())
+  name               String
+  discountPercentage Float
+  startDate          DateTime
+  endDate            DateTime
+  availableOn        DiscountAvailableOn
+  coupons            Coupon[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model Coupon {
+  id              String        @id @default(cuid())
+  code            String        @unique
+  status          CouponStatus  @default(UNUSED)
+  expirationDate  DateTime?
+  discountOfferId String
+  discountOffer   DiscountOffer @relation(fields: [discountOfferId], references: [id], onDelete: Cascade)
+  contactId       String?
+  contact         Contact?      @relation(fields: [contactId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model SaleOrder {
+  id             String           @id @default(cuid())
+  orderNumber    String           @unique
+  customerId     String
+  customer       Contact          @relation(fields: [customerId], references: [id])
+  status         OrderStatus      @default(DRAFT)
+  paymentTermId  String?
+  paymentTerm    PaymentTerm?     @relation(fields: [paymentTermId], references: [id])
+  lines          SaleOrderLine[]
+  couponCode     String?
+  discountAmount Float            @default(0)
+  subtotal       Float            @default(0)
+  taxAmount      Float            @default(0)
+  totalAmount    Float            @default(0)
+  orderDate      DateTime         @default(now())
+  invoice        CustomerInvoice?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model SaleOrderLine {
+  id        String    @id @default(cuid())
+  orderId   String
+  order     SaleOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product   @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Float
+  tax       Float     @default(0)
+  total     Float
+  createdAt DateTime  @default(now())
+}
+
+model PurchaseOrder {
+  id          String              @id @default(cuid())
+  orderNumber String              @unique
+  vendorId    String
+  vendor      Contact             @relation(fields: [vendorId], references: [id])
+  status      OrderStatus         @default(DRAFT)
+  lines       PurchaseOrderLine[]
+  subtotal    Float               @default(0)
+  taxAmount   Float               @default(0)
+  totalAmount Float               @default(0)
+  orderDate   DateTime            @default(now())
+  bill        VendorBill?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model PurchaseOrderLine {
+  id        String        @id @default(cuid())
+  orderId   String
+  order     PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product       @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Float
+  tax       Float         @default(0)
+  total     Float
+  createdAt DateTime      @default(now())
+}
+
+model CustomerInvoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  orderId       String        @unique
+  order         SaleOrder     @relation(fields: [orderId], references: [id])
+  customerId    String
+  customer      Contact       @relation(fields: [customerId], references: [id])
+  invoiceDate   DateTime      @default(now())
+  dueDate       DateTime
+  subtotal      Float
+  taxAmount     Float
+  totalAmount   Float
+  paidAmount    Float         @default(0)
+  paidOn        DateTime?
+  status        InvoiceStatus @default(UNPAID)
+  payments      Payment[]     @relation("CustomerPayments")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model VendorBill {
+  id          String        @id @default(cuid())
+  billNumber  String        @unique
+  orderId     String        @unique
+  order       PurchaseOrder @relation(fields: [orderId], references: [id])
+  vendorId    String
+  vendor      Contact       @relation(fields: [vendorId], references: [id])
+  invoiceDate DateTime      @default(now())
+  dueDate     DateTime
+  subtotal    Float
+  taxAmount   Float
+  totalAmount Float
+  paidAmount  Float         @default(0)
+  paidOn      DateTime?
+  status      InvoiceStatus @default(UNPAID)
+  payments    Payment[]     @relation("VendorPayments")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Payment {
+  id                String           @id @default(cuid())
+  amount            Float
+  method            String // cash/bank_transfer/upi/card
+  paymentType       String // send/receive
+  partnerType       String // customer/vendor
+  date              DateTime         @default(now())
+  note              String?
+  customerInvoiceId String?
+  customerInvoice   CustomerInvoice? @relation("CustomerPayments", fields: [customerInvoiceId], references: [id])
+  vendorBillId      String?
+  vendorBill        VendorBill?      @relation("VendorPayments", fields: [vendorBillId], references: [id])
+  createdAt         DateTime         @default(now())
+}
+
+model Settings {
+  id                 String  @id @default("settings")
+  automaticInvoicing Boolean @default(true)
+}

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: appareldesk_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: appareldesk
+      POSTGRES_PASSWORD: appareldesk_password
+      POSTGRES_DB: appareldesk
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appareldesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: n8n for automation workflows
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: appareldesk_n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin
+      - N8N_HOST=localhost
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  n8n_data:

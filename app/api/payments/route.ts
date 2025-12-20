@@ -1,0 +1,165 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { paymentSchema } from '@/lib/validators'
+import { getPaginationParams } from '@/lib/utils'
+
+// GET /api/payments
+export async function GET(request: NextRequest) {
+    try {
+        const searchParams = request.nextUrl.searchParams
+        const { page, limit, skip } = getPaginationParams(searchParams)
+
+        const where: Record<string, unknown> = {}
+        const partnerType = searchParams.get('partnerType')
+        if (partnerType) where.partnerType = partnerType
+
+        const [payments, total] = await Promise.all([
+            prisma.payment.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    customerInvoice: { include: { customer: true } },
+                    vendorBill: { include: { vendor: true } },
+                },
+            }),
+            prisma.payment.count({ where }),
+        ])
+
+        return NextResponse.json({
+            success: true,
+            data: payments,
+            pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+        })
+    } catch (error) {
+        console.error('Payments fetch error:', error)
+        return NextResponse.json(
+            { success: false, message: 'Failed to fetch payments' },
+            { status: 500 }
+        )
+    }
+}
+
+// POST /api/payments - Register payment
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json()
+        const validation = paymentSchema.safeParse(body)
+
+        if (!validation.success) {
+            return NextResponse.json(
+                { success: false, message: 'Validation failed', errors: validation.error.flatten().fieldErrors },
+                { status: 400 }
+            )
+        }
+
+        const { amount, method, paymentType, partnerType, date, note, customerInvoiceId, vendorBillId } = validation.data
+
+        const payment = await prisma.$transaction(async (tx) => {
+            const newPayment = await tx.payment.create({
+                data: {
+                    amount,
+                    method,
+                    paymentType,
+                    partnerType,
+                    date: new Date(date),
+                    note,
+                    customerInvoiceId,
+                    vendorBillId,
+                },
+            })
+
+            // Update invoice/bill status
+            if (customerInvoiceId) {
+                const invoice = await tx.customerInvoice.findUnique({
+                    where: { id: customerInvoiceId },
+                })
+
+                if (invoice) {
+                    const newPaidAmount = invoice.paidAmount + amount
+                    const status =
+                        newPaidAmount >= invoice.totalAmount ? 'PAID' :
+                            newPaidAmount > 0 ? 'PARTIAL' : 'UNPAID'
+
+                    await tx.customerInvoice.update({
+                        where: { id: customerInvoiceId },
+                        data: {
+                            paidAmount: newPaidAmount,
+                            status,
+                            paidOn: status === 'PAID' ? new Date() : null,
+                        },
+                    })
+
+                    if (status === 'PAID') {
+                        await tx.saleOrder.update({
+                            where: { id: invoice.orderId },
+                            data: { status: 'PAID' },
+                        })
+                    }
+                }
+            }
+
+            if (vendorBillId) {
+                const bill = await tx.vendorBill.findUnique({
+                    where: { id: vendorBillId },
+                })
+
+                if (bill) {
+                    const newPaidAmount = bill.paidAmount + amount
+                    const status =
+                        newPaidAmount >= bill.totalAmount ? 'PAID' :
+                            newPaidAmount > 0 ? 'PARTIAL' : 'UNPAID'
+
+                    await tx.vendorBill.update({
+                        where: { id: vendorBillId },
+                        data: {
+                            paidAmount: newPaidAmount,
+                            status,
+                            paidOn: status === 'PAID' ? new Date() : null,
+                        },
+                    })
+
+                    if (status === 'PAID') {
+                        await tx.purchaseOrder.update({
+                            where: { id: bill.orderId },
+                            data: { status: 'PAID' },
+                        })
+                    }
+                }
+            }
+
+            return newPayment
+        })
+
+        // Trigger webhook
+        await triggerWebhook('payment.registered', { paymentId: payment.id, amount, partnerType })
+
+        return NextResponse.json({
+            success: true,
+            message: 'Payment registered successfully',
+            data: payment,
+        }, { status: 201 })
+    } catch (error) {
+        console.error('Payment registration error:', error)
+        return NextResponse.json(
+            { success: false, message: 'Failed to register payment' },
+            { status: 500 }
+        )
+    }
+}
+
+async function triggerWebhook(event: string, data: Record<string, unknown>) {
+    const webhookUrl = process.env.N8N_WEBHOOK_URL
+    if (!webhookUrl) return
+
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event, data, timestamp: new Date().toISOString() }),
+        })
+    } catch (error) {
+        console.error('Webhook trigger failed:', error)
+    }
+}
