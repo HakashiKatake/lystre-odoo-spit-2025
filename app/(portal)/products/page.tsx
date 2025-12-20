@@ -288,57 +288,59 @@ export default function ProductsPage() {
         <main className="flex-1 p-6">
           {/* Search Bar */}
           <div className="mb-6">
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1 max-w-xl">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#8B7355]" />
+            <div className="flex items-stretch gap-4">
+              <div className="relative flex-1 max-w-xl flex items-center">
+                <div className="absolute left-4 flex items-center justify-center">
+                  <Search className="w-5 h-5 text-[#8B7355]" />
+                </div>
                 <input
                   type="text"
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 border-2 border-[#2B1810] focus:outline-none focus:ring-2 focus:ring-[#8B7355] bg-white text-[#2B1810] placeholder-[#8B7355]"
+                  className="w-full h-12 pl-12 pr-12 border-2 border-[#2B1810] focus:outline-none focus:ring-2 focus:ring-[#8B7355] bg-white text-[#2B1810] placeholder-[#8B7355]"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 hover:bg-[#F5EBE0] rounded"
+                    className="absolute right-4 flex items-center justify-center p-1 hover:bg-[#F5EBE0] rounded"
                   >
                     <X className="w-4 h-4 text-[#8B7355]" />
                   </button>
                 )}
               </div>
-              <div className="px-4 py-3 bg-[#F5EBE0] border-2 border-[#2B1810] text-[#2B1810]">
-                <span className="font-bold">{filteredProducts.length}</span> products
+              <div className="h-12 px-4 flex items-center bg-[#F5EBE0] border-2 border-[#2B1810] text-[#2B1810]">
+                <span className="font-bold">{filteredProducts.length}</span>&nbsp;products
               </div>
             </div>
           </div>
 
           {/* Product Type Tabs */}
-          <div className="flex flex-wrap gap-0 mb-8 border-2 border-[#2B1810] inline-flex">
-            <button
+          <div className="flex flex-wrap gap-2 mb-8">
+            <Button
               onClick={() => setSelectedType("All products")}
-              className={`px-4 py-2 text-sm font-medium border-r-2 border-[#2B1810] transition-colors ${
+              variant={selectedType === "All products" ? "default" : "outline"}
+              className={`border-2 border-[#2B1810] ${
                 selectedType === "All products"
                   ? "bg-[#8B7355] text-white"
                   : "bg-white text-[#2B1810] hover:bg-[#F5EBE0]"
               }`}
             >
               All Products
-            </button>
-            {PRODUCT_TYPES.map((type, index) => (
-              <button
+            </Button>
+            {PRODUCT_TYPES.map((type) => (
+              <Button
                 key={type.value}
                 onClick={() => setSelectedType(type.value)}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  index < PRODUCT_TYPES.length - 1 ? "border-r-2 border-[#2B1810]" : ""
-                } ${
+                variant={selectedType === type.value ? "default" : "outline"}
+                className={`border-2 border-[#2B1810] ${
                   selectedType === type.value
                     ? "bg-[#8B7355] text-white"
                     : "bg-white text-[#2B1810] hover:bg-[#F5EBE0]"
                 }`}
               >
                 {type.label}
-              </button>
+              </Button>
             ))}
           </div>
 
