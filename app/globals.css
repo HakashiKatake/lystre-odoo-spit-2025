@@ -46,6 +46,7 @@
   --color-lystre-beige: #f8f3f0;
   --color-lystre-grey: #e5e5e5;
   --color-lystre-accent: #d4af37;
+  --color-lystre-brown: #A1887F;
 }
 
 @theme inline {
@@ -98,6 +99,7 @@
   --color-lystre-beige: var(--color-lystre-beige);
   --color-lystre-grey: var(--color-lystre-grey);
   --color-lystre-accent: var(--color-lystre-accent);
+  --color-lystre-brown: var(--color-lystre-brown);
   /* Animation */
   --animate-spin-slow: spin-slow 3s linear infinite;
 }
@@ -429,6 +431,7 @@ input[type="checkbox"] {
 }
 
 @media (max-width: 768px) {
+
   .grid-2,
   .grid-3,
   .grid-4 {
@@ -614,6 +617,7 @@ input[type="checkbox"] {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -622,4 +626,3 @@ input[type="checkbox"] {
 .animate-spin-slow {
   animation: spin-slow 8s linear infinite;
 }
-
