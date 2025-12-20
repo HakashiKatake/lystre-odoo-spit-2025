@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Package, FileText, UserCircle, Loader2, MapPin, Phone, Mail } from "lucide-react";
+import { Package, FileText, UserCircle, Loader2, MapPin, Phone, Mail, LogOut } from "lucide-react";
 import { Button } from "@/components/retroui/Button";
 import { toast } from "sonner";
 
@@ -201,10 +201,27 @@ export default function AccountPage() {
                 {/* Your Invoices */}
                 <button
                   onClick={() => router.push("/invoices")}
-                  className="w-full flex items-center gap-4 p-4 bg-white hover:bg-[#F5EBE0]/50 transition-all"
+                  className="w-full flex items-center gap-4 p-4 bg-white hover:bg-[#F5EBE0]/50 transition-all border-b-2 border-[#2B1810]"
                 >
                   <FileText className="w-6 h-6 text-[#2B1810]" />
                   <span className="text-lg font-medium text-[#2B1810]">Your Invoices</span>
+                </button>
+
+                {/* Logout */}
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch("/api/auth/logout", { method: "POST" });
+                      toast.success("Logged out successfully");
+                      router.push("/login");
+                    } catch {
+                      toast.error("Failed to logout");
+                    }
+                  }}
+                  className="w-full flex items-center gap-4 p-4 bg-white hover:bg-[#EF4444]/10 transition-all"
+                >
+                  <LogOut className="w-6 h-6 text-[#EF4444]" />
+                  <span className="text-lg font-medium text-[#EF4444]">Logout</span>
                 </button>
               </div>
 

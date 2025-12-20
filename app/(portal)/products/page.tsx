@@ -425,12 +425,14 @@ export default function ProductsPage() {
                   : "Try adjusting your filters or search query."}
               </p>
               {hasActiveFilters && (
-                <Button
-                  onClick={clearFilters}
-                  className="bg-[#8B7355] text-white border-2 border-[#2B1810] hover:bg-[#6B5344]"
-                >
-                  Clear All Filters
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    onClick={clearFilters}
+                    className="bg-[#8B7355] text-white border-2 border-[#2B1810] hover:bg-[#6B5344]"
+                  >
+                    Clear All Filters
+                  </Button>
+                </div>
               )}
             </div>
           )}
