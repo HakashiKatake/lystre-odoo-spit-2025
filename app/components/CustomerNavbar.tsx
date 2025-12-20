@@ -1,17 +1,42 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, User } from "lucide-react";
 import { useCartStore } from "@/lib/store";
 import { Button } from "@/components/retroui/Button";
 
+interface UserProfile {
+  name: string;
+  email: string;
+}
+
 export function CustomerNavbar() {
   const pathname = usePathname();
   const items = useCartStore((state) => state.items);
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (data.success && data.data) {
+          setUser({
+            name: data.data.name || data.data.email.split("@")[0],
+            email: data.data.email,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
-    <nav className="bg-white border-b border-[#E5D4C1] sticky top-0 z-40">
+    <nav className="bg-white border-b-2 border-[#2B1810] sticky top-0 z-40">
       <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
         {/* Left: Logo + Nav */}
         <div className="flex items-center space-x-8">
@@ -20,27 +45,27 @@ export function CustomerNavbar() {
           </Link>
           <div className="hidden md:flex items-center space-x-4 text-sm">
             <Link href="/">
-              <Button 
-                variant="outline" 
-                className={pathname === "/" ? "bg-[#E5D4C1] text-[#8B7355]" : ""}
+              <Button
+                variant="outline"
+                className={`border-2 border-[#2B1810] ${pathname === "/" ? "bg-[#F5EBE0]" : ""}`}
               >
                 Home
               </Button>
             </Link>
             <Link href="/products">
-              <Button 
+              <Button
                 variant="outline"
-                className={pathname.startsWith("/products") ? "bg-[#E5D4C1] text-[#8B7355]" : ""}
+                className={`border-2 border-[#2B1810] ${pathname.startsWith("/products") ? "bg-[#F5EBE0]" : ""}`}
               >
                 Shop
               </Button>
             </Link>
-            <Link href="/orders">
-              <Button 
+            <Link href="/account">
+              <Button
                 variant="outline"
-                className={pathname.startsWith("/orders") ? "bg-[#E5D4C1] text-[#8B7355]" : ""}
+                className={`border-2 border-[#2B1810] ${pathname.startsWith("/account") ? "bg-[#F5EBE0]" : ""}`}
               >
-                My Orders
+                My Account
               </Button>
             </Link>
           </div>
@@ -48,21 +73,31 @@ export function CustomerNavbar() {
 
         {/* Right: Cart + User */}
         <div className="flex items-center space-x-4">
-          <Link href="/cart" className="p-2 hover:bg-[#F5EBE0] rounded-full transition-colors relative">
-            <ShoppingCart className="w-5 h-5 text-gray-700" />
-            {items.length > 0 && (
-              <span className="absolute top-0 right-0 bg-[#8B7355] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
-                {items.length}
-              </span>
-            )}
+          <Link href="/cart">
+            <button className="p-2 hover:bg-[#F5EBE0] transition-colors relative border-2 border-[#2B1810]">
+              <ShoppingCart className="w-5 h-5 text-[#2B1810]" />
+              {items.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#8B7355] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#2B1810]">
+                  {items.length}
+                </span>
+              )}
+            </button>
           </Link>
-          <Link 
-            href="/login" 
-            className="flex items-center space-x-2 px-3 py-2 bg-[#F5EBE0] rounded-full hover:bg-[#E5D4C1] transition-colors"
-          >
-            <User className="w-4 h-4 text-gray-700" />
-            <span className="text-sm text-gray-700 font-medium">Account</span>
-          </Link>
+          {user ? (
+            <Link href="/account">
+              <div className="flex items-center space-x-2 px-4 py-2 bg-[#F5EBE0] border-2 border-[#2B1810] hover:bg-[#E5D4C1] transition-colors cursor-pointer">
+                <User className="w-4 h-4 text-[#2B1810]" />
+                <span className="text-sm text-[#2B1810] font-medium">{user.name}</span>
+              </div>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <div className="flex items-center space-x-2 px-4 py-2 bg-[#F5EBE0] border-2 border-[#2B1810] hover:bg-[#E5D4C1] transition-colors cursor-pointer">
+                <User className="w-4 h-4 text-[#2B1810]" />
+                <span className="text-sm text-[#2B1810] font-medium">Account</span>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

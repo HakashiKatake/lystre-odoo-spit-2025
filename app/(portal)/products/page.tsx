@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Search, ShoppingCart, Loader2, Package } from "lucide-react";
+import { ChevronDown, Search, ShoppingCart, Loader2, Package, X } from "lucide-react";
 import { useCartStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/utils";
 import { PRODUCT_TYPES, PRODUCT_CATEGORIES, PRODUCT_MATERIALS, PRODUCT_COLORS } from "@/lib/constants";
 import { Button } from "@/components/retroui/Button";
-import { Card } from "@/components/retroui/Card";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const SIZES = ["S", "M", "L", "XL", "XXL"];
 
@@ -36,7 +36,7 @@ export default function ProductsPage() {
   // Frontend state - filters & UI
   const [selectedType, setSelectedType] = useState("All products");
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(true);
   const [sizeOpen, setSizeOpen] = useState(false);
   const [materialOpen, setMaterialOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
@@ -125,9 +125,20 @@ export default function ProductsPage() {
     );
   };
 
+  // Clear all filters
+  const clearFilters = () => {
+    setSelectedType("All products");
+    setSelectedCategories([]);
+    setSelectedMaterials([]);
+    setSearchQuery("");
+    setPriceRange(50000);
+  };
+
+  const hasActiveFilters = selectedType !== "All products" || selectedCategories.length > 0 || selectedMaterials.length > 0 || searchQuery || priceRange < 50000;
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32">
+      <div className="bg-[#FFFEF9] flex items-center justify-center py-32">
         <Loader2 className="w-8 h-8 animate-spin text-[#8B7355]" />
       </div>
     );
@@ -137,169 +148,213 @@ export default function ProductsPage() {
     <div className="bg-[#FFFEF9]">
       <div className="max-w-[1920px] mx-auto flex">
         {/* Left Sidebar - Filters */}
-        <aside className="w-48 bg-white border-r border-[#E5D4C1] p-6 space-y-6 hidden md:block min-h-screen sticky top-16">
-          {/* Category */}
-          <div>
-            <Button
-              onClick={() => setCategoryOpen(!categoryOpen)}
-              variant="outline"
-              className="flex items-center justify-between w-full text-[#8B7355] font-medium mb-2"
-            >
-              Category
-              <ChevronDown className={`w-4 h-4 transition-transform ${categoryOpen ? "rotate-180" : ""}`} />
-            </Button>
-            {categoryOpen && (
-              <div className="space-y-2 pl-2">
-                {PRODUCT_CATEGORIES.map((cat) => (
-                  <label key={cat.value} className="flex items-center text-sm text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="mr-2 rounded border-[#E5D4C1] accent-[#8B7355]"
-                      checked={selectedCategories.includes(cat.value)}
-                      onChange={() => toggleCategory(cat.value)}
-                    />
-                    {cat.label}
-                  </label>
-                ))}
-              </div>
+        <aside className="w-64 bg-white border-r-2 border-[#2B1810] p-6 hidden md:block min-h-screen sticky top-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-serif text-[#2B1810]">Filters</h2>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-[#8B7355] hover:underline"
+              >
+                Clear all
+              </button>
             )}
           </div>
 
-          {/* Size */}
-          <div>
-            <Button
-              onClick={() => setSizeOpen(!sizeOpen)}
-              variant="outline"
-              className="flex items-center justify-between w-full text-[#8B7355] font-medium mb-2"
-            >
-              Size
-              <ChevronDown className={`w-4 h-4 transition-transform ${sizeOpen ? "rotate-180" : ""}`} />
-            </Button>
-            {sizeOpen && (
-              <div className="space-y-2 pl-2">
-                {SIZES.map((size) => (
-                  <label key={size} className="flex items-center text-sm text-gray-600">
-                    <input type="checkbox" className="mr-2 rounded border-[#E5D4C1] accent-[#8B7355]" />
-                    {size}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+          <div className="space-y-4">
+            {/* Category */}
+            <div className="border-2 border-[#2B1810]">
+              <button
+                onClick={() => setCategoryOpen(!categoryOpen)}
+                className="flex items-center justify-between w-full p-3 bg-[#F5EBE0] text-[#2B1810] font-medium"
+              >
+                Category
+                <ChevronDown className={`w-4 h-4 transition-transform ${categoryOpen ? "rotate-180" : ""}`} />
+              </button>
+              {categoryOpen && (
+                <div className="p-3 space-y-2 bg-white">
+                  {PRODUCT_CATEGORIES.map((cat) => (
+                    <label key={cat.value} className="flex items-center text-sm text-[#2B1810] cursor-pointer hover:text-[#8B7355]">
+                      <input
+                        type="checkbox"
+                        className="mr-3 w-4 h-4 rounded border-2 border-[#2B1810] accent-[#8B7355]"
+                        checked={selectedCategories.includes(cat.value)}
+                        onChange={() => toggleCategory(cat.value)}
+                      />
+                      {cat.label}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* Material */}
-          <div>
-            <Button
-              onClick={() => setMaterialOpen(!materialOpen)}
-              variant="outline"
-              className="flex items-center justify-between w-full text-[#8B7355] font-medium mb-2"
-            >
-              Material
-              <ChevronDown className={`w-4 h-4 transition-transform ${materialOpen ? "rotate-180" : ""}`} />
-            </Button>
-            {materialOpen && (
-              <div className="space-y-2 pl-2">
-                {PRODUCT_MATERIALS.map((mat) => (
-                  <label key={mat.value} className="flex items-center text-sm text-gray-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="mr-2 rounded border-[#E5D4C1] accent-[#8B7355]"
-                      checked={selectedMaterials.includes(mat.value)}
-                      onChange={() => toggleMaterial(mat.value)}
-                    />
-                    {mat.label}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+            {/* Size */}
+            <div className="border-2 border-[#2B1810]">
+              <button
+                onClick={() => setSizeOpen(!sizeOpen)}
+                className="flex items-center justify-between w-full p-3 bg-[#F5EBE0] text-[#2B1810] font-medium"
+              >
+                Size
+                <ChevronDown className={`w-4 h-4 transition-transform ${sizeOpen ? "rotate-180" : ""}`} />
+              </button>
+              {sizeOpen && (
+                <div className="p-3 space-y-2 bg-white">
+                  {SIZES.map((size) => (
+                    <label key={size} className="flex items-center text-sm text-[#2B1810] cursor-pointer hover:text-[#8B7355]">
+                      <input type="checkbox" className="mr-3 w-4 h-4 rounded border-2 border-[#2B1810] accent-[#8B7355]" />
+                      {size}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* Color */}
-          <div>
-            <Button
-              onClick={() => setColorOpen(!colorOpen)}
-              variant="outline"
-              className="flex items-center justify-between w-full text-[#8B7355] font-medium mb-2"
-            >
-              Color
-              <ChevronDown className={`w-4 h-4 transition-transform ${colorOpen ? "rotate-180" : ""}`} />
-            </Button>
-            {colorOpen && (
-              <div className="space-y-2 pl-2">
-                {PRODUCT_COLORS.slice(0, 5).map((color) => (
-                  <label key={color.value} className="flex items-center text-sm text-gray-600">
-                    <input type="checkbox" className="mr-2 rounded border-[#E5D4C1] accent-[#8B7355]" />
-                    {color.label}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+            {/* Material */}
+            <div className="border-2 border-[#2B1810]">
+              <button
+                onClick={() => setMaterialOpen(!materialOpen)}
+                className="flex items-center justify-between w-full p-3 bg-[#F5EBE0] text-[#2B1810] font-medium"
+              >
+                Material
+                <ChevronDown className={`w-4 h-4 transition-transform ${materialOpen ? "rotate-180" : ""}`} />
+              </button>
+              {materialOpen && (
+                <div className="p-3 space-y-2 bg-white">
+                  {PRODUCT_MATERIALS.map((mat) => (
+                    <label key={mat.value} className="flex items-center text-sm text-[#2B1810] cursor-pointer hover:text-[#8B7355]">
+                      <input
+                        type="checkbox"
+                        className="mr-3 w-4 h-4 rounded border-2 border-[#2B1810] accent-[#8B7355]"
+                        checked={selectedMaterials.includes(mat.value)}
+                        onChange={() => toggleMaterial(mat.value)}
+                      />
+                      {mat.label}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* Price Range */}
-          <div>
-            <h3 className="text-[#8B7355] font-medium mb-2">Price Range</h3>
-            <input
-              type="range"
-              min="0"
-              max="50000"
-              step="1000"
-              value={priceRange}
-              onChange={(e) => setPriceRange(Number(e.target.value))}
-              className="w-full accent-[#8B7355]"
-            />
-            <div className="mt-2 text-sm text-gray-600 font-medium">
-              ₹0 - ₹{priceRange.toLocaleString("en-IN")}
+            {/* Color */}
+            <div className="border-2 border-[#2B1810]">
+              <button
+                onClick={() => setColorOpen(!colorOpen)}
+                className="flex items-center justify-between w-full p-3 bg-[#F5EBE0] text-[#2B1810] font-medium"
+              >
+                Color
+                <ChevronDown className={`w-4 h-4 transition-transform ${colorOpen ? "rotate-180" : ""}`} />
+              </button>
+              {colorOpen && (
+                <div className="p-3 space-y-2 bg-white">
+                  {PRODUCT_COLORS.slice(0, 6).map((color) => (
+                    <label key={color.value} className="flex items-center text-sm text-[#2B1810] cursor-pointer hover:text-[#8B7355]">
+                      <input type="checkbox" className="mr-3 w-4 h-4 rounded border-2 border-[#2B1810] accent-[#8B7355]" />
+                      <span
+                        className="w-4 h-4 rounded-full border border-[#2B1810] mr-2"
+                        style={{ backgroundColor: color.value }}
+                      />
+                      {color.label}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Price Range */}
+            <div className="border-2 border-[#2B1810]">
+              <div className="p-3 bg-[#F5EBE0] text-[#2B1810] font-medium">
+                Price Range
+              </div>
+              <div className="p-4 bg-white">
+                <input
+                  type="range"
+                  min="0"
+                  max="50000"
+                  step="1000"
+                  value={priceRange}
+                  onChange={(e) => setPriceRange(Number(e.target.value))}
+                  className="w-full accent-[#8B7355]"
+                />
+                <div className="mt-3 flex justify-between text-sm text-[#2B1810]">
+                  <span>₹0</span>
+                  <span className="font-bold">₹{priceRange.toLocaleString("en-IN")}</span>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          {/* Product Type Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-[#E5D4C1]">
-            <Button
-              onClick={() => setSelectedType("All products")}
-              variant="outline"
-              className={`text-sm font-medium ${selectedType === "All products" ? "bg-[#E5D4C1] text-[#8B7355]" : ""}`}
-            >
-              All products
-            </Button>
-            {PRODUCT_TYPES.map((type) => (
-              <Button
-                key={type.value}
-                onClick={() => setSelectedType(type.value)}
-                variant="outline"
-                className={`text-sm font-medium ${selectedType === type.value ? "bg-[#E5D4C1] text-[#8B7355]" : ""}`}
-              >
-                {type.label}
-              </Button>
-            ))}
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 max-w-xl">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#8B7355]" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-12 py-3 border-2 border-[#2B1810] focus:outline-none focus:ring-2 focus:ring-[#8B7355] bg-white text-[#2B1810] placeholder-[#8B7355]"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 hover:bg-[#F5EBE0] rounded"
+                  >
+                    <X className="w-4 h-4 text-[#8B7355]" />
+                  </button>
+                )}
+              </div>
+              <div className="px-4 py-3 bg-[#F5EBE0] border-2 border-[#2B1810] text-[#2B1810]">
+                <span className="font-bold">{filteredProducts.length}</span> products
+              </div>
+            </div>
           </div>
 
-          {/* Search Bar + Sort */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-[#E5D4C1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B7355] bg-white"
-              />
-            </div>
-            <div className="ml-4 text-sm text-gray-600">
-              <span className="font-medium">{filteredProducts.length}</span> products found
-            </div>
+          {/* Product Type Tabs */}
+          <div className="flex flex-wrap gap-0 mb-8 border-2 border-[#2B1810] inline-flex">
+            <button
+              onClick={() => setSelectedType("All products")}
+              className={`px-4 py-2 text-sm font-medium border-r-2 border-[#2B1810] transition-colors ${
+                selectedType === "All products"
+                  ? "bg-[#8B7355] text-white"
+                  : "bg-white text-[#2B1810] hover:bg-[#F5EBE0]"
+              }`}
+            >
+              All Products
+            </button>
+            {PRODUCT_TYPES.map((type, index) => (
+              <button
+                key={type.value}
+                onClick={() => setSelectedType(type.value)}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  index < PRODUCT_TYPES.length - 1 ? "border-r-2 border-[#2B1810]" : ""
+                } ${
+                  selectedType === type.value
+                    ? "bg-[#8B7355] text-white"
+                    : "bg-white text-[#2B1810] hover:bg-[#F5EBE0]"
+                }`}
+              >
+                {type.label}
+              </button>
+            ))}
           </div>
 
           {/* Product Grid */}
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
-                <Card key={product.id} className="w-full shadow-none hover:shadow-none group">
-                  <Card.Content className="pb-0 relative aspect-[3/4] overflow-hidden">
+              {filteredProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white border-2 border-[#2B1810] group hover:shadow-[4px_4px_0px_#2B1810] transition-shadow"
+                >
+                  {/* Product Image */}
+                  <div className="relative aspect-[3/4] overflow-hidden border-b-2 border-[#2B1810]">
                     {product.images?.[0] ? (
                       <Image
                         src={product.images[0]}
@@ -310,60 +365,69 @@ export default function ProductsPage() {
                       />
                     ) : (
                       <div className="w-full h-full bg-[#F5EBE0] flex items-center justify-center">
-                        <Package size={48} className="text-[#E5D4C1]" />
+                        <Package size={48} className="text-[#8B7355]" />
                       </div>
                     )}
                     {product.stock <= 0 && (
-                      <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute top-3 right-3 bg-[#EF4444] text-white text-xs px-3 py-1 border-2 border-[#2B1810]">
                         Out of Stock
                       </div>
                     )}
-                  </Card.Content>
-                  <Card.Header className="pb-0 pt-4">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{product.category}</p>
-                    <Card.Title className="text-lg font-serif">{product.name}</Card.Title>
-                  </Card.Header>
-                  <Card.Content className="flex justify-between items-center pt-2">
-                    <p className="text-lg font-semibold text-[#8B7355]">
+                    {product.stock > 0 && product.stock <= 5 && (
+                      <div className="absolute top-3 right-3 bg-[#F59E0B] text-white text-xs px-3 py-1 border-2 border-[#2B1810]">
+                        Only {product.stock} left
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="p-4">
+                    <p className="text-xs text-[#8B7355] uppercase tracking-wider mb-1">{product.category}</p>
+                    <h3 className="text-lg font-serif text-[#2B1810] mb-2 line-clamp-1">{product.name}</h3>
+                    <p className="text-xl font-bold text-[#8B7355] mb-4">
                       {formatCurrency(product.salesPrice)}
                     </p>
+                    
+                    {/* Buttons */}
                     <div className="flex gap-2">
-                      <Link href={`/products/${product.id}`}>
-                        <Button variant="outline">View</Button>
+                      <Link href={`/products/${product.id}`} className="flex-1">
+                        <Button variant="outline" className="w-full border-2 border-[#2B1810]">
+                          View
+                        </Button>
                       </Link>
                       <Button
                         variant="outline"
                         onClick={() => handleAddToCart(product)}
                         disabled={product.stock <= 0}
+                        className="border-2 border-[#2B1810] px-3 disabled:opacity-50"
                       >
-                        <ShoppingCart size={16} />
+                        <ShoppingCart size={18} />
                       </Button>
                     </div>
-                  </Card.Content>
-                </Card>
+                  </div>
+                </motion.div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-20">
-              <Package size={64} className="mx-auto text-[#E5D4C1] mb-4" />
-              <p className="text-xl font-serif text-gray-500">
+            <div className="text-center py-20 bg-white border-2 border-[#2B1810]">
+              <Package size={64} className="mx-auto text-[#8B7355] mb-4" />
+              <h3 className="text-2xl font-serif text-[#2B1810] mb-2">
                 {products.length === 0
-                  ? "No products available yet. Check back soon!"
-                  : "No products found matching your filters."}
+                  ? "No products available yet"
+                  : "No products found"}
+              </h3>
+              <p className="text-[#8B7355] mb-6">
+                {products.length === 0
+                  ? "Check back soon for new arrivals!"
+                  : "Try adjusting your filters or search query."}
               </p>
-              {products.length > 0 && (
-                <button
-                  onClick={() => {
-                    setSelectedType("All products");
-                    setSelectedCategories([]);
-                    setSelectedMaterials([]);
-                    setSearchQuery("");
-                    setPriceRange(50000);
-                  }}
-                  className="mt-4 text-[#8B7355] underline hover:opacity-70"
+              {hasActiveFilters && (
+                <Button
+                  onClick={clearFilters}
+                  className="bg-[#8B7355] text-white border-2 border-[#2B1810] hover:bg-[#6B5344]"
                 >
-                  Clear all filters
-                </button>
+                  Clear All Filters
+                </Button>
               )}
             </div>
           )}
