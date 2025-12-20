@@ -265,10 +265,8 @@ export default function AdminProductsPage() {
                       value={product.status || 'new'} 
                       onValueChange={(v) => changeStatus(product.id, v)}
                     >
-                      <SelectTrigger className="w-[110px] h-8">
-                        <Badge variant={getStatusVariant(product.status)} className="capitalize">
-                          {product.status || 'new'}
-                        </Badge>
+                      <SelectTrigger className="w-[120px] h-8">
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">New</SelectItem>
