@@ -106,6 +106,7 @@ export default function ProductsPage() {
       name: product.name,
       price: product.salesPrice,
       quantity: 1,
+      image: product.images?.[0] || undefined,
       tax: product.salesTax,
     });
     toast.success(`${product.name} added to cart!`);

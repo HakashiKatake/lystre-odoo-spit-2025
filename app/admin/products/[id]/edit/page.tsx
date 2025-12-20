@@ -32,7 +32,10 @@ interface Product {
   published: boolean
   status: string
   images?: string[]
+  sizes?: string[]
 }
+
+const SIZES = ['S', 'M', 'L', 'XL', 'XXL']
 
 const CATEGORIES = ['men', 'women', 'kids', 'accessories', 'home', 'electronics', 'books', 'other']
 const TYPES = ['shirt', 'pants', 'dress', 'kurta', 'saree', 'shoes', 'bag', 'watch', 'jewelry', 'other']
@@ -54,6 +57,7 @@ export default function EditProductPage() {
     salesTax: 10,
     published: false,
     status: 'new',
+    sizes: [] as string[],
   })
 
   useEffect(() => {
@@ -78,6 +82,7 @@ export default function EditProductPage() {
           salesTax: product.salesTax || 10,
           published: product.published || false,
           status: product.status || 'new',
+          sizes: product.sizes || [],
         })
       } else {
         toast.error('Product not found')
@@ -126,6 +131,15 @@ export default function EditProductPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const toggleSize = (size: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter((s) => s !== size)
+        : [...prev.sizes, size],
+    }))
   }
 
   if (loading) {
@@ -212,6 +226,31 @@ export default function EditProductPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="col-span-2">
+                  <Label>Available Sizes</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {SIZES.map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => toggleSize(size)}
+                        className={`w-12 h-10 border-2 font-medium transition-all ${
+                          formData.sizes.includes(size)
+                            ? 'border-amber-500 bg-amber-500 text-white'
+                            : 'border-gray-300 hover:border-gray-400 bg-white'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                  {formData.sizes.length > 0 && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Selected: {formData.sizes.join(', ')}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

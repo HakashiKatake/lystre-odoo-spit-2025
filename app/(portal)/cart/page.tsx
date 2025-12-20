@@ -180,6 +180,11 @@ export default function CartPage() {
                             Color: {item.color}
                           </p>
                         )}
+                        {item.size && (
+                          <p className="text-sm text-[#8B7355]">
+                            Size: {item.size}
+                          </p>
+                        )}
                       </div>
                       <button
                         onClick={() => handleRemoveItem(item.productId)}

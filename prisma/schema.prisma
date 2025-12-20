@@ -92,6 +92,7 @@ model Product {
   type               String // shirt/pant/kurta/tshirt/formals/jeans/hoodies/sarees/nightwear
   material           String // cotton/nylon/polyester/wool
   colors             String[] // multi-select
+  sizes              String[] // available sizes: S, M, L, XL, XXL, etc.
   stock              Int                 @default(0)
   salesPrice         Float
   salesTax           Float               @default(0)
