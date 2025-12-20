@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { saleOrderSchema } from '@/lib/validators'
 import { getPaginationParams, generateOrderNumber } from '@/lib/utils'
+import { triggerN8NWebhook } from '@/lib/n8n-webhook'
 
 // GET /api/sale-orders
 export async function GET(request: NextRequest) {
@@ -118,6 +119,9 @@ export async function POST(request: NextRequest) {
             },
         })
 
+        // Trigger webhook for order creation
+        await triggerN8NWebhook({ data: 'order' })
+
         return NextResponse.json({
             success: true,
             message: 'Sale order created successfully',
@@ -131,3 +135,4 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+

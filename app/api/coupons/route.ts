@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
+import { triggerN8NWebhook } from '@/lib/n8n-webhook'
 
 // Generate coupon code
 function generateCouponCode(): string {
@@ -168,6 +169,9 @@ export async function POST(request: NextRequest) {
             })
         }
 
+        // Trigger webhook when offer/coupon is selected
+        await triggerN8NWebhook({ data: 'offer' })
+
         return NextResponse.json({
             success: true,
             valid: true,
@@ -182,3 +186,4 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+

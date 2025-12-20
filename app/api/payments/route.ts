@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { paymentSchema } from '@/lib/validators'
 import { getPaginationParams } from '@/lib/utils'
+import { triggerN8NWebhook } from '@/lib/n8n-webhook'
 
 // GET /api/payments
 export async function GET(request: NextRequest) {
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Trigger webhook
-        await triggerWebhook('payment.registered', { paymentId: payment.id, amount, partnerType })
+        await triggerN8NWebhook({ data: 'payment' })
 
         return NextResponse.json({
             success: true,
@@ -149,17 +150,3 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function triggerWebhook(event: string, data: Record<string, unknown>) {
-    const webhookUrl = process.env.N8N_WEBHOOK_URL
-    if (!webhookUrl) return
-
-    try {
-        await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ event, data, timestamp: new Date().toISOString() }),
-        })
-    } catch (error) {
-        console.error('Webhook trigger failed:', error)
-    }
-}
