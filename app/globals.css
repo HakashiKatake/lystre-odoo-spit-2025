@@ -39,6 +39,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Lystré Colors */
+  --color-lystre-white: #ffffff;
+  --color-lystre-black: #000000;
+  --color-lystre-beige: #f8f3f0;
+  --color-lystre-grey: #e5e5e5;
+  --color-lystre-accent: #d4af37;
 }
 
 @theme inline {
@@ -56,6 +63,7 @@
   --color-warning: var(--warning);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-playfair-display), serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -84,6 +92,14 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  /* Lystré Colors */
+  --color-lystre-white: var(--color-lystre-white);
+  --color-lystre-black: var(--color-lystre-black);
+  --color-lystre-beige: var(--color-lystre-beige);
+  --color-lystre-grey: var(--color-lystre-grey);
+  --color-lystre-accent: var(--color-lystre-accent);
+  /* Animation */
+  --animate-spin-slow: spin-slow 3s linear infinite;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -306,7 +322,7 @@ input[type="checkbox"] {
 /* Page title in pink box (like wireframes) */
 .page-title {
   display: inline-block;
-  background: linear-gradient(135deg, #D4A574, #B08968);
+  background: linear-gradient(135deg, #d4a574, #b08968);
   color: white;
   padding: 0.5rem 1.5rem;
   border-radius: var(--radius);
@@ -413,7 +429,6 @@ input[type="checkbox"] {
 }
 
 @media (max-width: 768px) {
-
   .grid-2,
   .grid-3,
   .grid-4 {
@@ -593,3 +608,18 @@ input[type="checkbox"] {
     @apply bg-background text-foreground;
   }
 }
+
+/* Lystré Landing Page Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+

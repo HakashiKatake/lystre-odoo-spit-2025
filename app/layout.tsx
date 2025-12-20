@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -13,10 +13,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair-display",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "ApparelDesk - E-Commerce Platform",
-  description: "Your one-stop destination for quality clothing. Shop the latest trends in men's, women's, and children's fashion.",
-  keywords: ["clothing", "e-commerce", "fashion", "apparel", "online shopping"],
+  title: "Lystré - Premium E-Commerce",
+  description:
+    "A premium e-commerce experience. Shop the latest trends in fashion, jewelry, and ready-to-wear collections.",
+  keywords: [
+    "clothing",
+    "e-commerce",
+    "fashion",
+    "apparel",
+    "online shopping",
+    "jewelry",
+    "luxury",
+  ],
 };
 
 export default function RootLayout({
@@ -27,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
         {children}
         <Toaster richColors position="top-right" />
