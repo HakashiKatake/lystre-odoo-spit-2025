@@ -142,6 +142,24 @@ export default function RegisterPage() {
 
           <div className="space-y-1.5">
             <Label
+              htmlFor="mobile"
+              className="text-xs font-semibold uppercase tracking-wider text-[#2B1810]"
+            >
+              Mobile Number
+            </Label>
+            <Input
+              id="mobile"
+              type="tel"
+              value={formData.mobile}
+              onChange={(e) => handleChange("mobile", e.target.value)}
+              placeholder="+91 98765 43210"
+              autoComplete="tel"
+              className="bg-white border-[#E5E7EB] focus:border-[#8B7355] focus:ring-[#8B7355] h-12 rounded-lg"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label
               htmlFor="password"
               className="text-xs font-semibold uppercase tracking-wider text-[#2B1810]"
             >
