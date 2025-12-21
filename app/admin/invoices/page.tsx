@@ -27,11 +27,10 @@ import {
 interface Invoice {
     id: string;
     invoiceNumber: string;
-    invoiceDate: string;
+    createdAt: string;
     dueDate: string;
     totalAmount: number;
-    amountPaid: number;
-    amountDue: number;
+    paidAmount: number;
     status: string;
     customer: {
         name: string;
@@ -162,10 +161,10 @@ export default function AdminInvoicesPage() {
                                 <TableRow key={invoice.id} className="border-b border-black/10 hover:bg-gray-50/50">
                                     <TableCell className="font-bold text-black font-mono">{invoice.invoiceNumber}</TableCell>
                                     <TableCell>{invoice.customer?.name || "N/A"}</TableCell>
-                                    <TableCell className="text-gray-600">{formatDate(invoice.invoiceDate)}</TableCell>
+                                    <TableCell className="text-gray-600">{formatDate(invoice.createdAt)}</TableCell>
                                     <TableCell className="text-gray-600">{formatDate(invoice.dueDate)}</TableCell>
                                     <TableCell className="font-bold font-mono">{formatCurrency(invoice.totalAmount)}</TableCell>
-                                    <TableCell className="font-mono text-green-600">{formatCurrency(invoice.amountPaid)}</TableCell>
+                                    <TableCell className="font-mono text-green-600">{formatCurrency(invoice.paidAmount || 0)}</TableCell>
                                     <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
@@ -174,8 +173,8 @@ export default function AdminInvoicesPage() {
                                                     <Eye size={16} />
                                                 </Button>
                                             </Link>
-                                            {invoice.amountDue > 0 && (
-                                                <Link href={`/admin/payments/new?invoiceId=${invoice.id}`}>
+                                            {invoice.status !== "PAID" && (
+                                                <Link href={`/admin/payments/new?invoiceId=${invoice.invoiceNumber}`}>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -186,14 +185,16 @@ export default function AdminInvoicesPage() {
                                                     </Button>
                                                 </Link>
                                             )}
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 hover:bg-gray-100 border-2 border-transparent hover:border-black transition-all"
-                                                title="Download PDF"
-                                            >
-                                                <Download size={16} />
-                                            </Button>
+                                            <Link href={`/admin/invoices/${invoice.id}/print`} target="_blank">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 hover:bg-gray-100 border-2 border-transparent hover:border-black transition-all"
+                                                    title="Download PDF"
+                                                >
+                                                    <Download size={16} />
+                                                </Button>
+                                            </Link>
                                         </div>
                                     </TableCell>
                                 </TableRow>

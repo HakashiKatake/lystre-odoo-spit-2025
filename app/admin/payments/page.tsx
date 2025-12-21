@@ -26,16 +26,23 @@ import {
 
 interface Payment {
     id: string;
-    paymentDate: string;
+    date: string;
     paymentType: string;
-    paymentMethod: string;
+    partnerType: string;
+    method: string;
     amount: number;
-    reference?: string;
-    contact?: {
-        name: string;
-    };
-    invoice?: {
+    note?: string;
+    customerInvoice?: {
         invoiceNumber: string;
+        customer: {
+            name: string;
+        };
+    };
+    vendorBill?: {
+        billNumber: string;
+        vendor: {
+            name: string;
+        };
     };
 }
 
@@ -65,10 +72,12 @@ export default function PaymentsPage() {
     };
 
     const filteredPayments = payments.filter((p) => {
+        const partnerName = p.customerInvoice?.customer?.name || p.vendorBill?.vendor?.name || "";
+        const invoiceNumber = p.customerInvoice?.invoiceNumber || p.vendorBill?.billNumber || "";
         const matchesSearch =
-            p.contact?.name?.toLowerCase().includes(search.toLowerCase()) ||
-            p.reference?.toLowerCase().includes(search.toLowerCase()) ||
-            p.invoice?.invoiceNumber?.toLowerCase().includes(search.toLowerCase());
+            partnerName.toLowerCase().includes(search.toLowerCase()) ||
+            invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
+            p.note?.toLowerCase().includes(search.toLowerCase());
         const matchesType = typeFilter === "all" ? true : p.paymentType === typeFilter;
         return matchesSearch && matchesType;
     });
@@ -148,11 +157,15 @@ export default function PaymentsPage() {
                         <TableBody>
                             {filteredPayments.map((payment) => (
                                 <TableRow key={payment.id} className="border-b border-black/10 hover:bg-gray-50/50">
-                                    <TableCell className="text-gray-600">{formatDate(payment.paymentDate)}</TableCell>
+                                    <TableCell className="text-gray-600">{formatDate(payment.date)}</TableCell>
                                     <TableCell>{getTypeBadge(payment.paymentType)}</TableCell>
-                                    <TableCell className="font-medium text-black">{payment.contact?.name || "N/A"}</TableCell>
-                                    <TableCell>{payment.paymentMethod}</TableCell>
-                                    <TableCell className="font-mono text-xs">{payment.invoice?.invoiceNumber || payment.reference || "-"}</TableCell>
+                                    <TableCell className="font-medium text-black">
+                                        {payment.customerInvoice?.customer?.name || payment.vendorBill?.vendor?.name || "N/A"}
+                                    </TableCell>
+                                    <TableCell className="capitalize">{payment.method}</TableCell>
+                                    <TableCell className="font-mono text-xs">
+                                        {payment.customerInvoice?.invoiceNumber || payment.vendorBill?.billNumber || "-"}
+                                    </TableCell>
                                     <TableCell className="font-bold font-mono text-amber-600">{formatCurrency(payment.amount)}</TableCell>
                                     <TableCell>
                                         <Link href={`/admin/payments/${payment.id}`}>

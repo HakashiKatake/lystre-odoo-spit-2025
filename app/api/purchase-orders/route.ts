@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
                 include: {
                     vendor: true,
                     lines: { include: { product: true } },
+                    bill: true,
                 },
             }),
             prisma.purchaseOrder.count({ where }),

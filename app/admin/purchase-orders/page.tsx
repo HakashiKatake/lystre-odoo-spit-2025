@@ -33,6 +33,9 @@ interface PurchaseOrder {
     vendor: {
         name: string;
     };
+    bill?: {
+        id: string;
+    };
 }
 
 export default function PurchaseOrdersPage() {
@@ -67,6 +70,26 @@ export default function PurchaseOrdersPage() {
         const matchesStatus = statusFilter === "all" ? true : o.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
+
+    const handleCreateBill = async (orderId: string) => {
+        try {
+            const res = await fetch("/api/vendor-bills", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success("Vendor bill created successfully!");
+                fetchOrders(); // Refresh the list
+            } else {
+                toast.error(data.message || "Failed to create vendor bill.");
+            }
+        } catch (err) {
+            console.error("Failed to create bill:", err);
+            toast.error("An error occurred while creating the vendor bill.");
+        }
+    };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -172,12 +195,13 @@ export default function PurchaseOrdersPage() {
                                                     <Eye size={16} />
                                                 </Button>
                                             </Link>
-                                            {order.status === "CONFIRMED" && (
+                                            {order.status === "CONFIRMED" && !order.bill && (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 text-amber-600 hover:bg-amber-50 border-2 border-transparent hover:border-black transition-all"
                                                     title="Create Bill"
+                                                    onClick={() => handleCreateBill(order.id)}
                                                 >
                                                     <FileText size={16} />
                                                 </Button>

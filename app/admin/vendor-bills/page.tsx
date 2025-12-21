@@ -27,11 +27,10 @@ import {
 interface VendorBill {
     id: string;
     billNumber: string;
-    billDate: string;
+    createdAt: string;
     dueDate: string;
     totalAmount: number;
-    amountPaid: number;
-    amountDue: number;
+    paidAmount: number;
     status: string;
     vendor: {
         name: string;
@@ -162,10 +161,10 @@ export default function VendorBillsPage() {
                                 <TableRow key={bill.id} className="border-b border-black/10 hover:bg-gray-50/50">
                                     <TableCell className="font-bold text-black font-mono">{bill.billNumber}</TableCell>
                                     <TableCell>{bill.vendor?.name || "N/A"}</TableCell>
-                                    <TableCell className="text-gray-600">{formatDate(bill.billDate)}</TableCell>
+                                    <TableCell className="text-gray-600">{formatDate(bill.createdAt)}</TableCell>
                                     <TableCell className="text-gray-600">{formatDate(bill.dueDate)}</TableCell>
                                     <TableCell className="font-bold font-mono">{formatCurrency(bill.totalAmount)}</TableCell>
-                                    <TableCell className="font-mono text-green-600">{formatCurrency(bill.amountPaid)}</TableCell>
+                                    <TableCell className="font-mono text-green-600">{formatCurrency(bill.paidAmount || 0)}</TableCell>
                                     <TableCell>{getStatusBadge(bill.status)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
@@ -174,7 +173,7 @@ export default function VendorBillsPage() {
                                                     <Eye size={16} />
                                                 </Button>
                                             </Link>
-                                            {bill.amountDue > 0 && (
+                                            {bill.status !== "PAID" && (
                                                 <Link href={`/admin/payments/new?billId=${bill.id}`}>
                                                     <Button
                                                         variant="ghost"

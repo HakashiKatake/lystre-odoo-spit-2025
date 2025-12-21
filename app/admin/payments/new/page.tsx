@@ -51,8 +51,14 @@ function PaymentFormContent() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    ...formData,
-                    paymentType: formData.partnerType === "customer" ? "receive" : "send",
+                    amount: formData.amount,
+                    method: formData.method,
+                    date: formData.date,
+                    note: formData.note || undefined,
+                    partnerType: formData.partnerType === "customer" ? "CUSTOMER" : "VENDOR",
+                    paymentType: formData.partnerType === "customer" ? "INBOUND" : "OUTBOUND",
+                    customerInvoiceId: formData.customerInvoiceId || undefined,
+                    vendorBillId: formData.vendorBillId || undefined,
                 }),
             });
 

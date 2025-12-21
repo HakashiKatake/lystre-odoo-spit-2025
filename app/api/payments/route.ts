@@ -57,6 +57,50 @@ export async function POST(request: NextRequest) {
 
         const { amount, method, paymentType, partnerType, date, note, customerInvoiceId, vendorBillId } = validation.data
 
+        // Validate invoice/bill exists if provided
+        let validatedInvoiceId = null
+        let validatedBillId = null
+
+        if (customerInvoiceId) {
+            // Try to find by ID first, then by invoice number
+            let invoice = await prisma.customerInvoice.findUnique({
+                where: { id: customerInvoiceId },
+            })
+            if (!invoice) {
+                // Try to find by invoice number
+                invoice = await prisma.customerInvoice.findFirst({
+                    where: { invoiceNumber: customerInvoiceId },
+                })
+            }
+            if (!invoice) {
+                return NextResponse.json(
+                    { success: false, message: 'Invoice not found. Please enter a valid invoice ID or invoice number.' },
+                    { status: 400 }
+                )
+            }
+            validatedInvoiceId = invoice.id
+        }
+
+        if (vendorBillId) {
+            // Try to find by ID first, then by bill number
+            let bill = await prisma.vendorBill.findUnique({
+                where: { id: vendorBillId },
+            })
+            if (!bill) {
+                // Try to find by bill number
+                bill = await prisma.vendorBill.findFirst({
+                    where: { billNumber: vendorBillId },
+                })
+            }
+            if (!bill) {
+                return NextResponse.json(
+                    { success: false, message: 'Vendor bill not found. Please enter a valid bill ID or bill number.' },
+                    { status: 400 }
+                )
+            }
+            validatedBillId = bill.id
+        }
+
         const payment = await prisma.$transaction(async (tx) => {
             const newPayment = await tx.payment.create({
                 data: {
@@ -65,16 +109,16 @@ export async function POST(request: NextRequest) {
                     paymentType,
                     partnerType,
                     date: new Date(date),
-                    note,
-                    customerInvoiceId,
-                    vendorBillId,
+                    note: note || null,
+                    customerInvoiceId: validatedInvoiceId,
+                    vendorBillId: validatedBillId,
                 },
             })
 
             // Update invoice/bill status
-            if (customerInvoiceId) {
+            if (validatedInvoiceId) {
                 const invoice = await tx.customerInvoice.findUnique({
-                    where: { id: customerInvoiceId },
+                    where: { id: validatedInvoiceId },
                 })
 
                 if (invoice) {
@@ -84,7 +128,7 @@ export async function POST(request: NextRequest) {
                             newPaidAmount > 0 ? 'PARTIAL' : 'UNPAID'
 
                     await tx.customerInvoice.update({
-                        where: { id: customerInvoiceId },
+                        where: { id: validatedInvoiceId },
                         data: {
                             paidAmount: newPaidAmount,
                             status,
@@ -101,9 +145,9 @@ export async function POST(request: NextRequest) {
                 }
             }
 
-            if (vendorBillId) {
+            if (validatedBillId) {
                 const bill = await tx.vendorBill.findUnique({
-                    where: { id: vendorBillId },
+                    where: { id: validatedBillId },
                 })
 
                 if (bill) {
@@ -113,7 +157,7 @@ export async function POST(request: NextRequest) {
                             newPaidAmount > 0 ? 'PARTIAL' : 'UNPAID'
 
                     await tx.vendorBill.update({
-                        where: { id: vendorBillId },
+                        where: { id: validatedBillId },
                         data: {
                             paidAmount: newPaidAmount,
                             status,
