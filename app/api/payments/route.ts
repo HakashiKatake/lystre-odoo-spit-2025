@@ -134,7 +134,24 @@ export async function POST(request: NextRequest) {
         })
 
         // Trigger webhook
-        await triggerN8NWebhook({ data: 'payment' })
+        // Trigger webhook
+        if (payment.customerInvoiceId) {
+            const invoice = await prisma.customerInvoice.findUnique({
+                where: { id: payment.customerInvoiceId },
+                include: { customer: true, order: true },
+            })
+
+            if (invoice) {
+                await triggerN8NWebhook({
+                    trigger_type: 'payment_received',
+                    customer_name: invoice.customer.name,
+                    customer_email: [invoice.customer.email],
+                    order_id: invoice.order.orderNumber,
+                    order_total: payment.amount,
+                    year: new Date().getFullYear(),
+                })
+            }
+        }
 
         return NextResponse.json({
             success: true,

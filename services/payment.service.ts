@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { generateOrderNumber } from '@/lib/utils'
 import type { PaymentInput } from '@/lib/validators'
+import { triggerN8NWebhook } from '@/lib/n8n-webhook'
 
 // ============== CUSTOMER INVOICE SERVICE ==============
 
@@ -36,6 +37,19 @@ export async function createCustomerInvoice(saleOrderId: string) {
             order: { include: { lines: { include: { product: true } } } },
         },
     })
+
+    if (invoice) {
+        await triggerN8NWebhook({
+            trigger_type: 'invoice_generated',
+            customer_name: invoice.customer.name,
+            customer_email: [invoice.customer.email],
+            order_id: invoice.order.orderNumber,
+            payment_status: invoice.status,
+            order_total: invoice.totalAmount,
+            invoice_link: `https://lystre.com/invoice/${invoice.id}.pdf`,
+            year: new Date().getFullYear(),
+        })
+    }
 
     return invoice
 }
@@ -186,6 +200,26 @@ export async function registerPayment(data: PaymentInput) {
 
         return newPayment
     })
+
+    // Trigger webhook for payment
+    if (payment && payment.customerInvoiceId) {
+        // Fetch invoice to get details for webhook
+        const invoice = await prisma.customerInvoice.findUnique({
+            where: { id: payment.customerInvoiceId },
+            include: { customer: true, order: true },
+        })
+
+        if (invoice) {
+            await triggerN8NWebhook({
+                trigger_type: 'payment_received',
+                customer_name: invoice.customer.name,
+                customer_email: [invoice.customer.email],
+                order_id: invoice.order.orderNumber,
+                order_total: payment.amount, // Amount paid in this transaction
+                year: new Date().getFullYear(),
+            })
+        }
+    }
 
     return payment
 }

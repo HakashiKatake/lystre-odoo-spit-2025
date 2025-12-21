@@ -1,4 +1,4 @@
-export async function triggerN8NWebhook(payload: { data: string }) {
+export async function triggerN8NWebhook(payload: any) {
     const webhookUrl = process.env.N8N_WEBHOOK_URL
     if (!webhookUrl) return
 
