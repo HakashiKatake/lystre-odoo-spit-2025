@@ -65,7 +65,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error("Failed to fetch profile:", err);
-      toast.error("Failed to load profile");
+      toast.error("We encountered an issue loading your profile. Please refresh the page.");
     } finally {
       setLoading(false);
     }
@@ -93,13 +93,13 @@ export default function ProfilePage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Profile updated successfully!");
+        toast.success("Profile updated successfully! Your changes have been saved.");
       } else {
-        toast.error(data.message || "Failed to update profile");
+        toast.error(data.message || "We couldn't update your profile. Please try again.");
       }
     } catch (err) {
       console.error("Failed to save profile:", err);
-      toast.error("Failed to save profile");
+      toast.error("An error occurred while saving your profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -110,12 +110,12 @@ export default function ProfilePage() {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("New passwords do not match");
+      toast.error("The new passwords do not match. Please try again.");
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("Your password must be at least 6 characters long.");
       return;
     }
 
@@ -134,14 +134,14 @@ export default function ProfilePage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Password changed successfully!");
+        toast.success("Password changed successfully! You can now use your new password.");
         setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        toast.error(data.message || "Failed to change password");
+        toast.error(data.message || "We couldn't change your password. Please try again.");
       }
     } catch (err) {
       console.error("Failed to change password:", err);
-      toast.error("Failed to change password");
+      toast.error("An error occurred while changing your password. Please try again.");
     } finally {
       setSaving(false);
     }

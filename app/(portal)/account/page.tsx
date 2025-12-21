@@ -69,7 +69,7 @@ export default function AccountPage() {
       }
     } catch (err) {
       console.error("Failed to fetch profile:", err);
-      toast.error("Failed to load profile");
+      toast.error("We encountered an issue loading your profile. Please refresh the page.");
     } finally {
       setLoading(false);
     }
@@ -97,13 +97,13 @@ export default function AccountPage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Profile updated successfully!");
+        toast.success("Profile updated successfully! Your changes have been saved.");
       } else {
-        toast.error(data.message || "Failed to update profile");
+        toast.error(data.message || "We couldn't update your profile. Please try again.");
       }
     } catch (err) {
       console.error("Failed to save profile:", err);
-      toast.error("Failed to save profile");
+      toast.error("An error occurred while saving your profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -114,12 +114,12 @@ export default function AccountPage() {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("New passwords do not match");
+      toast.error("The new passwords do not match. Please try again.");
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("Your password must be at least 6 characters long.");
       return;
     }
 
@@ -138,14 +138,14 @@ export default function AccountPage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Password changed successfully!");
+        toast.success("Password changed successfully! You can now use your new password.");
         setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        toast.error(data.message || "Failed to change password");
+        toast.error(data.message || "We couldn't change your password. Please try again.");
       }
     } catch (err) {
       console.error("Failed to change password:", err);
-      toast.error("Failed to change password");
+      toast.error("An error occurred while changing your password. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -212,10 +212,10 @@ export default function AccountPage() {
                   onClick={async () => {
                     try {
                       await fetch("/api/auth/logout", { method: "POST" });
-                      toast.success("Logged out successfully");
+                      toast.success("You have been logged out successfully. See you soon!");
                       router.push("/login");
                     } catch {
-                      toast.error("Failed to logout");
+                      toast.error("We couldn't log you out. Please try again.");
                     }
                   }}
                   className="w-full flex items-center gap-4 p-4 bg-white hover:bg-[#EF4444]/10 transition-all"

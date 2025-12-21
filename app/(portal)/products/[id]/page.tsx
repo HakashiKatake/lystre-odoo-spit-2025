@@ -77,14 +77,14 @@ export default function ProductDetailPage() {
     if (!product) return
     
     if (product.stock <= 0) {
-      toast.error('This product is out of stock')
+      toast.error('Sorry, this product is currently out of stock.')
       return
     }
 
     // Check if size is required and selected
     const availableSizes = product.sizes?.length ? product.sizes : SIZES
     if (!selectedSize && availableSizes.length > 0) {
-      toast.error('Please select a size')
+      toast.error('Please select a size to continue.')
       return
     }
     
@@ -98,7 +98,7 @@ export default function ProductDetailPage() {
       image: product.images?.[0] || undefined,
       tax: product.salesTax,
     })
-    toast.success(`Added ${quantity} item(s) to cart!`)
+    toast.success(`added ${quantity} ${product.name}(s) to your cart!`)
   }
 
   if (loading) {

@@ -59,16 +59,16 @@ export default function CartPage() {
         setCoupon(couponInput.toUpperCase(), discount);
         setCouponSuccess(`You have successfully applied the following code: ${couponInput.toUpperCase()}`);
         setCouponError("");
-        toast.success(data.message || `${data.discountPercentage}% discount applied!`);
+        toast.success(data.message || `Success! a ${data.discountPercentage}% discount has been applied.`);
       } else {
         setCouponError(data.message || "Invalid coupon code");
         setCouponSuccess("");
-        toast.error(data.message || "Invalid coupon code");
+        toast.error(data.message || "The coupon code you entered is invalid.");
       }
     } catch (err) {
       console.error("Coupon validation error:", err);
       setCouponError("Failed to validate coupon");
-      toast.error("Failed to validate coupon");
+      toast.error("We couldn't validate the coupon. Please try again.");
     } finally {
       setValidatingCoupon(false);
     }
@@ -77,7 +77,7 @@ export default function CartPage() {
   // Remove item - BACKEND LOGIC PRESERVED
   const handleRemoveItem = (productId: string) => {
     removeItem(productId);
-    toast.success("Item removed from cart");
+    toast.success("Item removed from cart.");
   };
 
   // Handle checkout

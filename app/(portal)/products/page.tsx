@@ -98,7 +98,7 @@ export default function ProductsPage() {
   // Add to cart handler - BACKEND LOGIC PRESERVED
   const handleAddToCart = (product: Product) => {
     if (product.stock <= 0) {
-      toast.error("This product is out of stock");
+      toast.error("Sorry, this product is currently out of stock.");
       return;
     }
     addToCart({
@@ -109,7 +109,7 @@ export default function ProductsPage() {
       image: product.images?.[0] || undefined,
       tax: product.salesTax,
     });
-    toast.success(`${product.name} added to cart!`);
+    toast.success(`Great choice! ${product.name} has been added to your cart.`);
   };
 
   // Toggle category selection

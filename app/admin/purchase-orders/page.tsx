@@ -54,7 +54,7 @@ export default function PurchaseOrdersPage() {
             }
         } catch (err) {
             console.error("Failed to fetch orders:", err);
-            toast.error("Failed to load purchase orders");
+            toast.error("We encountered an issue loading your purchase orders. Please refresh the page.");
         } finally {
             setLoading(false);
         }

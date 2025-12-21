@@ -59,11 +59,11 @@ export default function AdminProfilePage() {
                     pincode: data.data.contact?.pincode || "",
                 });
             } else {
-                toast.error("Please login to continue");
+                toast.error("You need to be logged in to access this page. Redirecting to login.");
                 router.push("/admin/login");
             }
         } catch {
-            toast.error("Failed to load profile");
+            toast.error("We couldn't load your profile information. Please try refreshing.");
         } finally {
             setLoading(false);
         }
@@ -71,7 +71,7 @@ export default function AdminProfilePage() {
 
     const handleSave = async () => {
         if (!formData.name) {
-            toast.error("Please enter your name");
+            toast.error("Your name is required. Please enter it to continue.");
             return;
         }
 
@@ -94,12 +94,12 @@ export default function AdminProfilePage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Profile updated successfully!");
+                toast.success("Profile updated! Your changes have been saved.");
             } else {
-                toast.error(data.message || "Failed to update profile");
+                toast.error(data.message || "We couldn't update your profile. Please try again.");
             }
         } catch {
-            toast.error("Failed to update profile");
+            toast.error("An error occurred while updating profile. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -107,15 +107,15 @@ export default function AdminProfilePage() {
 
     const handleChangePassword = async () => {
         if (!passwordData.currentPassword || !passwordData.newPassword) {
-            toast.error("Please fill in all password fields");
+            toast.error("All password fields are required. Please fill them in.");
             return;
         }
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            toast.error("New passwords do not match");
+            toast.error("The new passwords don't match. Please try again.");
             return;
         }
         if (passwordData.newPassword.length < 6) {
-            toast.error("Password must be at least 6 characters");
+            toast.error("Your new password must be at least 6 characters long.");
             return;
         }
 
@@ -134,14 +134,14 @@ export default function AdminProfilePage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Password changed successfully!");
+                toast.success("Password changed successfully! Please use your new password next time.");
                 setShowPasswordDialog(false);
                 setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
             } else {
-                toast.error(data.message || "Failed to change password");
+                toast.error(data.message || "We couldn't change your password. Please try again.");
             }
         } catch {
-            toast.error("Failed to change password");
+            toast.error("An error occurred while changing password. Please try again.");
         } finally {
             setChangingPassword(false);
         }

@@ -16,6 +16,8 @@ export const buttonVariants = cva(
           "shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none bg-transparent border-2 transition hover:translate-y-1 active:translate-y-2 active:translate-x-1",
         link: "bg-transparent hover:underline",
         ghost: "bg-transparent hover:bg-accent",
+        destructive:
+          "shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none bg-destructive text-destructive-foreground border-2 border-black transition hover:translate-y-1 active:translate-y-2 active:translate-x-1 hover:bg-red-600",
       },
       size: {
         sm: "px-3 py-1 text-sm shadow hover:shadow-none",

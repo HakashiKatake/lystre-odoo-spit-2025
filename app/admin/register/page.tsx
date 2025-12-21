@@ -63,7 +63,7 @@ export default function AdminRegisterPage() {
     e.preventDefault()
 
     if (!validate()) {
-      toast.error('Please fix the validation errors')
+      toast.error('Please check the form to ensure all fields are correct.')
       return
     }
 
@@ -82,7 +82,7 @@ export default function AdminRegisterPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('Admin account created! Please login.')
+        toast.success('Success! Your admin account has been created. Please log in.')
         router.push('/admin/login')
       } else {
         if (data.errors) {
@@ -90,10 +90,10 @@ export default function AdminRegisterPage() {
             setErrors((prev) => ({ ...prev, [key]: (value as string[])[0] }))
           })
         }
-        toast.error(data.message || 'Registration failed')
+        toast.error(data.message || 'We couldn\'t create your account. Please try again.')
       }
     } catch {
-      toast.error('An error occurred. Please try again.')
+      toast.error('Something went wrong on our end. Please try again later.')
     } finally {
       setIsLoading(false)
     }

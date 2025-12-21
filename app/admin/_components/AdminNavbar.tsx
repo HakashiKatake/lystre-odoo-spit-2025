@@ -45,10 +45,10 @@ export function AdminNavbar() {
     const handleLogout = async () => {
         try {
             await fetch("/api/auth/logout", { method: "POST" });
-            toast.success("Logged out successfully");
+            toast.success("You have been logged out safely. See you next time!");
             router.push("/admin/login");
         } catch {
-            toast.error("Failed to logout");
+            toast.error("We encountered an issue logging you out. Please try again.");
         }
     };
 

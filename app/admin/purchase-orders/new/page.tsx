@@ -86,7 +86,7 @@ export default function NewPurchaseOrderPage() {
 
     const addLine = () => {
         if (!selectedProduct) {
-            toast.error("Please select a product");
+            toast.error("Please select a product to add to the order.");
             return;
         }
 
@@ -95,7 +95,7 @@ export default function NewPurchaseOrderPage() {
 
         // Check if product already in lines
         if (lines.some((l) => l.productId === product.id)) {
-            toast.error("Product already added");
+            toast.error("This product is already in the order. You can adjust the quantity instead.");
             return;
         }
 
@@ -134,11 +134,11 @@ export default function NewPurchaseOrderPage() {
 
     const handleSubmit = async () => {
         if (!vendorId) {
-            toast.error("Please select a vendor");
+            toast.error("Please select a vendor for this purchase order.");
             return;
         }
         if (lines.length === 0) {
-            toast.error("Please add at least one product");
+            toast.error("The order is empty. Please add at least one product.");
             return;
         }
 
@@ -162,14 +162,14 @@ export default function NewPurchaseOrderPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Purchase order created successfully!");
+                toast.success("Purchase order created successfully! It is now in draft status.");
                 router.push("/admin/purchase-orders");
             } else {
-                toast.error(data.message || "Failed to create purchase order");
+                toast.error(data.message || "We couldn't create the purchase order. Please try again.");
             }
         } catch (err) {
             console.error("Failed to create purchase order:", err);
-            toast.error("Failed to create purchase order");
+            toast.error("An error occurred while creating the purchase order. Please try again.");
         } finally {
             setSaving(false);
         }

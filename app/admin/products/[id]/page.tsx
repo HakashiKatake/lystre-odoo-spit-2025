@@ -55,12 +55,12 @@ export default function ProductDetailPage() {
             if (data.success) {
                 setProduct(data.data);
             } else {
-                toast.error("Product not found");
+                toast.error("We couldn't find the product you were looking for.");
                 router.push("/admin/products");
             }
         } catch (err) {
             console.error("Failed to fetch product:", err);
-            toast.error("Failed to load product");
+            toast.error("We encountered an issue loading the product details. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -79,12 +79,12 @@ export default function ProductDetailPage() {
 
             if (data.success) {
                 setProduct({ ...product, published: !product.published });
-                toast.success(`Product ${!product.published ? "published" : "unpublished"}!`);
+                toast.success(`Product ${!product.published ? "published" : "unpublished"} successfully! Visibility has been updated.`);
             } else {
-                toast.error(data.message || "Failed to update product");
+                toast.error(data.message || "We couldn't update the product visibility. Please try again.");
             }
         } catch {
-            toast.error("Failed to update product");
+            toast.error("An error occurred while updating the product. Please try again.");
         }
     };
 
@@ -99,13 +99,13 @@ export default function ProductDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Product deleted!");
+                toast.success("Product deleted successfully! It has been removed from the list.");
                 router.push("/admin/products");
             } else {
-                toast.error(data.message || "Failed to delete product");
+                toast.error(data.message || "We couldn't delete the product. Please try again.");
             }
         } catch {
-            toast.error("Failed to delete product");
+            toast.error("An error occurred while deleting the product. Please try again.");
         } finally {
             setDeleting(false);
         }

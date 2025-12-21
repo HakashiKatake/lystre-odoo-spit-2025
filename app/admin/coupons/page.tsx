@@ -61,7 +61,7 @@ export default function CouponsPage() {
             }
         } catch (err) {
             console.error("Failed to fetch coupons:", err);
-            toast.error("Failed to load coupons");
+            toast.error("We encountered an issue loading the coupons. Please refresh the page.");
         } finally {
             setLoading(false);
         }

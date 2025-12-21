@@ -35,7 +35,7 @@ export default function AdminSettingsPage() {
             }
         } catch (err) {
             console.error("Failed to fetch settings:", err);
-            toast.error("Failed to load settings");
+            toast.error("We couldn't load your settings. Please try refreshing.");
         } finally {
             setLoading(false);
         }
@@ -56,12 +56,12 @@ export default function AdminSettingsPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Settings saved successfully!");
+                toast.success("Settings saved successfully! Your preferences have been updated.");
             } else {
-                toast.error(data.message || "Failed to save settings");
+                toast.error(data.message || "We couldn't save your settings. Please try again.");
             }
         } catch {
-            toast.error("Failed to save settings");
+            toast.error("An error occurred while saving settings. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -82,15 +82,15 @@ export default function AdminSettingsPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success(checked ? "Automatic invoicing enabled" : "Automatic invoicing disabled");
+                toast.success(checked ? "Automatic invoicing has been enabled." : "Automatic invoicing has been disabled.");
             } else {
                 // Revert on failure
                 setSettings((s) => ({ ...s, automaticInvoicing: !checked }));
-                toast.error(data.message || "Failed to update setting");
+                toast.error(data.message || "We couldn't update the setting. Please try again.");
             }
         } catch {
             setSettings((s) => ({ ...s, automaticInvoicing: !checked }));
-            toast.error("Failed to update setting");
+            toast.error("An error occurred while updating the setting. Please try again.");
         }
     };
 

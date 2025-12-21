@@ -88,7 +88,7 @@ export default function NewSaleOrderPage() {
 
     const addLine = () => {
         if (!selectedProduct) {
-            toast.error("Please select a product");
+            toast.error("Please select a product to add to the order.");
             return;
         }
 
@@ -97,7 +97,7 @@ export default function NewSaleOrderPage() {
 
         // Check if product already in lines
         if (lines.some((l) => l.productId === product.id)) {
-            toast.error("Product already added");
+            toast.error("This product is already in the order. You can adjust the quantity instead.");
             return;
         }
 
@@ -137,18 +137,18 @@ export default function NewSaleOrderPage() {
 
     const handleSubmit = async () => {
         if (!customerId) {
-            toast.error("Please select a customer");
+            toast.error("Please select a customer for this sale order.");
             return;
         }
         if (lines.length === 0) {
-            toast.error("Please add at least one product");
+            toast.error("The order is empty. Please add at least one product.");
             return;
         }
 
         // Check stock availability
         for (const line of lines) {
             if (line.quantity > line.stock) {
-                toast.error(`Not enough stock for ${line.productName}. Available: ${line.stock}`);
+                toast.error(`We don't have enough stock for ${line.productName}. Only ${line.stock} available.`);
                 return;
             }
         }
@@ -173,14 +173,14 @@ export default function NewSaleOrderPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Sale order created successfully!");
+                toast.success("Sale order created successfully! It is now in draft status.");
                 router.push("/admin/sale-orders");
             } else {
-                toast.error(data.message || "Failed to create sale order");
+                toast.error(data.message || "We couldn't create the sale order. Please try again.");
             }
         } catch (err) {
             console.error("Failed to create sale order:", err);
-            toast.error("Failed to create sale order");
+            toast.error("An error occurred while creating the sale order. Please try again.");
         } finally {
             setSaving(false);
         }

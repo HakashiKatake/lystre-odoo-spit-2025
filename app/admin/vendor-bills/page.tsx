@@ -57,7 +57,7 @@ export default function VendorBillsPage() {
             }
         } catch (err) {
             console.error("Failed to fetch bills:", err);
-            toast.error("Failed to load vendor bills");
+            toast.error("We encountered an issue loading the vendor bills. Please refresh the page.");
         } finally {
             setLoading(false);
         }

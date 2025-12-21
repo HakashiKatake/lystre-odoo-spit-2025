@@ -64,7 +64,7 @@ export default function PaymentTermsPage() {
             }
         } catch (err) {
             console.error("Failed to fetch payment terms:", err);
-            toast.error("Failed to load payment terms");
+            toast.error("We couldn't load the payment terms. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -96,7 +96,7 @@ export default function PaymentTermsPage() {
 
     const handleSave = async () => {
         if (!formData.name) {
-            toast.error("Please enter a term name");
+            toast.error("The term name is required. Please give it a name.");
             return;
         }
 
@@ -121,15 +121,15 @@ export default function PaymentTermsPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success(editing ? "Payment term updated!" : "Payment term created!");
+                toast.success(editing ? "Payment term updated successfully!" : "New payment term created successfully!");
                 resetForm();
                 fetchTerms();
             } else {
-                toast.error(data.message || "Failed to save payment term");
+                toast.error(data.message || "We couldn't save the payment term. Please try again.");
             }
         } catch (err) {
             console.error("Failed to save payment term:", err);
-            toast.error("Failed to save payment term");
+            toast.error("An error occurred while saving. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -152,13 +152,13 @@ export default function PaymentTermsPage() {
                 setTerms((prev) =>
                     prev.map((t) => (t.id === term.id ? { ...t, active: !t.active } : t))
                 );
-                toast.success("Payment term updated!");
+                toast.success("Payment term status updated successfully!");
             } else {
-                toast.error(data.message || "Failed to update payment term");
+                toast.error(data.message || "We couldn't update the payment term status. Please try again.");
             }
         } catch (err) {
             console.error("Failed to toggle active:", err);
-            toast.error("Failed to update payment term");
+            toast.error("An error occurred while updating. Please try again.");
         }
     };
 
@@ -175,14 +175,14 @@ export default function PaymentTermsPage() {
 
             if (data.success) {
                 setTerms((prev) => prev.filter((t) => t.id !== deleteItem.id));
-                toast.success("Payment term deleted!");
+                toast.success("Payment term deleted successfully!");
                 setDeleteItem(null);
             } else {
-                toast.error(data.message || "Failed to delete payment term");
+                toast.error(data.message || "We couldn't delete the payment term. Please try again.");
             }
         } catch (err) {
             console.error("Failed to delete payment term:", err);
-            toast.error("Failed to delete payment term");
+            toast.error("An error occurred while deleting. Please try again.");
         } finally {
             setDeleting(false);
         }

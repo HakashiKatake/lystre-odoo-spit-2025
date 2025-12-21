@@ -79,7 +79,7 @@ export default function UsersPage() {
             }
         } catch (err) {
             console.error("Failed to fetch users:", err);
-            toast.error("Failed to load users");
+            toast.error("We encountered an issue loading the user list. Please try refreshing.");
         } finally {
             setLoading(false);
         }
@@ -126,13 +126,13 @@ export default function UsersPage() {
 
             if (data.success) {
                 setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
-                toast.success("User deleted!");
+                toast.success("User deleted successfully!");
                 setDeleteUser(null);
             } else {
-                toast.error(data.message || "Failed to delete user");
+                toast.error(data.message || "We couldn't delete the user. Please try again.");
             }
         } catch {
-            toast.error("Failed to delete user");
+            toast.error("An error occurred while deleting. Please try again.");
         } finally {
             setDeleting(false);
         }

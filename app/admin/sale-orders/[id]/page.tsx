@@ -90,12 +90,12 @@ export default function SaleOrderDetailPage() {
             if (data.success) {
                 setOrder(data.data);
             } else {
-                toast.error("Order not found");
+                toast.error("We couldn't find the sale order you were looking for.");
                 router.push("/admin/sale-orders");
             }
         } catch (err) {
             console.error("Failed to fetch order:", err);
-            toast.error("Failed to load order");
+            toast.error("We encountered an issue loading the sale order details. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -112,14 +112,14 @@ export default function SaleOrderDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Order confirmed successfully!");
+                toast.success("Order confirmed successfully! It is now ready for invoicing.");
                 fetchOrder();
             } else {
-                toast.error(data.message || "Failed to confirm order");
+                toast.error(data.message || "We couldn't confirm the order. Please try again.");
             }
         } catch (err) {
             console.error("Failed to confirm order:", err);
-            toast.error("Failed to confirm order");
+            toast.error("An error occurred while confirming the order. Please try again.");
         } finally {
             setProcessing(false);
         }
@@ -136,15 +136,15 @@ export default function SaleOrderDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Order cancelled successfully!");
+                toast.success("Order cancelled successfully. It has been marked as cancelled.");
                 setShowCancelDialog(false);
                 fetchOrder();
             } else {
-                toast.error(data.message || "Failed to cancel order");
+                toast.error(data.message || "We couldn't cancel the order. Please try again.");
             }
         } catch (err) {
             console.error("Failed to cancel order:", err);
-            toast.error("Failed to cancel order");
+            toast.error("An error occurred while cancelling the order. Please try again.");
         } finally {
             setProcessing(false);
         }
@@ -163,14 +163,14 @@ export default function SaleOrderDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Invoice created successfully!");
+                toast.success("Invoice created successfully! You can now view it.");
                 fetchOrder();
             } else {
-                toast.error(data.message || "Failed to create invoice");
+                toast.error(data.message || "We couldn't create the invoice. Please try again.");
             }
         } catch (err) {
             console.error("Failed to create invoice:", err);
-            toast.error("Failed to create invoice");
+            toast.error("An error occurred while creating the invoice. Please try again.");
         } finally {
             setProcessing(false);
         }

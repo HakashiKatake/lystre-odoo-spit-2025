@@ -57,7 +57,7 @@ export default function AdminInvoicesPage() {
             }
         } catch (err) {
             console.error("Failed to fetch invoices:", err);
-            toast.error("Failed to load invoices");
+            toast.error("We encountered an issue loading the invoices. Please refresh the page.");
         } finally {
             setLoading(false);
         }

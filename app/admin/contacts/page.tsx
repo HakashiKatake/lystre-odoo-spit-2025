@@ -53,7 +53,7 @@ export default function ContactsPage() {
             }
         } catch (err) {
             console.error("Failed to fetch contacts:", err);
-            toast.error("Failed to load contacts");
+            toast.error("We encountered an issue loading your contacts. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -77,13 +77,13 @@ export default function ContactsPage() {
 
             if (data.success) {
                 setContacts((prev) => prev.filter((c) => c.id !== deleteContact.id));
-                toast.success("Contact deleted!");
+                toast.success("Contact deleted successfully!");
                 setDeleteContact(null);
             } else {
-                toast.error(data.message || "Failed to delete contact");
+                toast.error(data.message || "We couldn't delete the contact. Please try again.");
             }
         } catch {
-            toast.error("Failed to delete contact");
+            toast.error("An error occurred while deleting the contact. Please try again.");
         } finally {
             setDeleting(false);
         }

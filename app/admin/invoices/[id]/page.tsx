@@ -102,12 +102,12 @@ export default function InvoiceDetailPage() {
                 setInvoice(data.data);
                 setPaymentAmount(data.data.amountDue.toString());
             } else {
-                toast.error("Invoice not found");
+                toast.error("We couldn't find the invoice you were looking for.");
                 router.push("/admin/invoices");
             }
         } catch (err) {
             console.error("Failed to fetch invoice:", err);
-            toast.error("Failed to load invoice");
+            toast.error("We encountered an issue loading the invoice details. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -118,12 +118,12 @@ export default function InvoiceDetailPage() {
 
         const amount = parseFloat(paymentAmount);
         if (isNaN(amount) || amount <= 0) {
-            toast.error("Please enter a valid amount");
+            toast.error("Please enter a valid payment amount greater than zero.");
             return;
         }
 
         if (amount > invoice.amountDue) {
-            toast.error("Amount cannot exceed amount due");
+            toast.error("The payment amount cannot exceed the total amount due.");
             return;
         }
 
@@ -147,16 +147,16 @@ export default function InvoiceDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Payment registered successfully!");
+                toast.success("Payment registered successfully! The invoice status has been updated.");
                 setShowPaymentModal(false);
                 setPaymentNote("");
                 fetchInvoice();
             } else {
-                toast.error(data.message || "Failed to register payment");
+                toast.error(data.message || "We couldn't register the payment. Please try again.");
             }
         } catch (err) {
             console.error("Payment registration failed:", err);
-            toast.error("Failed to register payment");
+            toast.error("An error occurred while registering the payment. Please try again.");
         } finally {
             setProcessing(false);
         }

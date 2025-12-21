@@ -64,11 +64,11 @@ export default function NewDiscountOfferPage() {
         e.preventDefault();
 
         if (!formData.name) {
-            toast.error("Please enter an offer name");
+            toast.error("The offer name is required. Please give it a clear name.");
             return;
         }
         if (!formData.endDate) {
-            toast.error("Please select an end date");
+            toast.error("The end date is required. Please set an expiration date for the offer.");
             return;
         }
 
@@ -118,14 +118,14 @@ export default function NewDiscountOfferPage() {
                     });
                 }
 
-                toast.success("Discount offer created successfully!");
+                toast.success("Discount offer created successfully! You can now view it in the list.");
                 router.push("/admin/discount-offers");
             } else {
-                toast.error(data.message || "Failed to create discount offer");
+                toast.error(data.message || "We couldn't create the discount offer. Please try again.");
             }
         } catch (err) {
             console.error("Failed to create discount offer:", err);
-            toast.error("Failed to create discount offer");
+            toast.error("An error occurred while creating the discount offer. Please try again.");
         } finally {
             setSaving(false);
         }

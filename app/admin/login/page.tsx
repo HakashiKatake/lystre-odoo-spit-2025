@@ -56,7 +56,7 @@ function AdminLoginForm() {
     e.preventDefault()
     
     if (!validate()) {
-      toast.error('Please fix the validation errors')
+      toast.error('Please check the form for errors and try again')
       return
     }
 
@@ -74,17 +74,17 @@ function AdminLoginForm() {
       if (data.success) {
         // Check if user is internal/admin
         if (data.data.role !== 'INTERNAL') {
-          toast.error('Access denied. Admin credentials required.')
+          toast.error('Access denied. You need admin rights to enter here.')
           return
         }
-        toast.success('Welcome back, Admin!')
+        toast.success('Welcome back! You have successfully logged in.')
         router.push(from)
         router.refresh()
       } else {
-        toast.error(data.message || 'Login failed')
+        toast.error(data.message || 'Login failed. Please verify your credentials and try again.')
       }
     } catch {
-      toast.error('An error occurred. Please try again.')
+      toast.error('Something went wrong. Please refresh the page and try again.')
     } finally {
       setIsLoading(false)
     }

@@ -67,7 +67,7 @@ export default function AdminProductsPage() {
             }
         } catch (err) {
             console.error("Failed to fetch products:", err);
-            toast.error("Failed to load products");
+            toast.error("We encountered an issue loading your products. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -98,12 +98,12 @@ export default function AdminProductsPage() {
                 setProducts((prev) =>
                     prev.map((p) => (p.id === id ? { ...p, published: !currentStatus } : p))
                 );
-                toast.success(`Product ${!currentStatus ? "published" : "unpublished"}!`);
+                toast.success(`Product ${!currentStatus ? "published" : "unpublished"} successfully!`);
             } else {
-                toast.error(data.message || "Failed to update product");
+                toast.error(data.message || "We couldn't update the product. Please try again.");
             }
         } catch {
-            toast.error("Failed to update product");
+            toast.error("An error occurred while updating the product. Please try again.");
         }
     };
 
@@ -120,12 +120,12 @@ export default function AdminProductsPage() {
                 setProducts((prev) =>
                     prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
                 );
-                toast.success(`Product status changed to ${newStatus}!`);
+                toast.success(`Product status changed to ${newStatus} successfully!`);
             } else {
-                toast.error(data.message || "Failed to update product");
+                toast.error(data.message || "We couldn't update the product. Please try again.");
             }
         } catch {
-            toast.error("Failed to update product status");
+            toast.error("An error occurred while updating the product status. Please try again.");
         }
     };
 
@@ -141,13 +141,13 @@ export default function AdminProductsPage() {
 
             if (data.success) {
                 setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-                toast.success("Product deleted!");
+                toast.success("Product deleted successfully!");
                 setDeleteProduct(null);
             } else {
-                toast.error(data.message || "Failed to delete product");
+                toast.error(data.message || "We couldn't delete the product. Please try again.");
             }
         } catch {
-            toast.error("Failed to delete product");
+            toast.error("An error occurred while deleting the product. Please try again.");
         } finally {
             setDeleting(false);
         }

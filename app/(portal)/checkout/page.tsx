@@ -52,11 +52,11 @@ export default function CheckoutPage() {
             });
           }
         } else {
-          toast.error("Please login to continue");
+          toast.error("Please login to complete your checkout.");
           router.push("/login?redirect=/checkout");
         }
       } catch {
-        toast.error("Please login to continue");
+        toast.error("Please login to complete your checkout.");
         router.push("/login?redirect=/checkout");
       }
     };
@@ -77,14 +77,14 @@ export default function CheckoutPage() {
     if (validateAddress()) {
       setStep("payment");
     } else {
-      toast.error("Please fill in all required address fields");
+      toast.error("Please fill in all required address fields to proceed.");
     }
   };
 
   // Handle place order - BACKEND LOGIC PRESERVED
   const handlePlaceOrder = async () => {
     if (!user?.contactId) {
-      toast.error("Please login to place an order");
+      toast.error("You need to be logged in to place an order.");
       return;
     }
 
@@ -121,15 +121,15 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Order placed successfully!");
+        toast.success("Order placed successfully! Thank you for your purchase.");
         clearCart();
         router.push(`/order-confirmation?order=${data.data.id}`);
       } else {
-        toast.error(data.message || "Failed to place order. Please try again.");
+        toast.error(data.message || "We couldn't place your order. Please try again.");
       }
     } catch (err) {
       console.error("Order placement failed:", err);
-      toast.error("Failed to place order. Please try again.");
+      toast.error("An error occurred while placing your order. Please try again.");
     } finally {
       setIsProcessing(false);
     }

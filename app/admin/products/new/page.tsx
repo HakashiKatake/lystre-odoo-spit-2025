@@ -38,12 +38,12 @@ export default function NewProductPage() {
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
-        if (!formData.name.trim()) newErrors.name = "Product name is required";
-        if (!formData.category) newErrors.category = "Category is required";
-        if (!formData.type) newErrors.type = "Product type is required";
-        if (!formData.material) newErrors.material = "Material is required";
-        if (formData.colors.length === 0) newErrors.colors = "Select at least one color";
-        if (formData.salesPrice <= 0) newErrors.salesPrice = "Sales price must be greater than 0";
+        if (!formData.name.trim()) newErrors.name = "Please give your product a clear name.";
+        if (!formData.category) newErrors.category = "Please select a category for this product.";
+        if (!formData.type) newErrors.type = "Please specify the type of product.";
+        if (!formData.material) newErrors.material = "Please choose the material for this product.";
+        if (formData.colors.length === 0) newErrors.colors = "Please select at least one available color.";
+        if (formData.salesPrice <= 0) newErrors.salesPrice = "The sales price must be greater than zero.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -52,7 +52,7 @@ export default function NewProductPage() {
         e.preventDefault();
 
         if (!validate()) {
-            toast.error("Please fix the validation errors");
+            toast.error("Please check the form for errors. Some required fields are missing or invalid.");
             return;
         }
 
@@ -68,13 +68,13 @@ export default function NewProductPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Product created successfully!");
+                toast.success("Product created successfully! You can now start managing it.");
                 router.push("/admin/products");
             } else {
-                toast.error(data.message || "Failed to create product");
+                toast.error(data.message || "We couldn't create the product. Please try again.");
             }
         } catch {
-            toast.error("An error occurred while creating the product");
+            toast.error("An error occurred while creating the product. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -106,7 +106,7 @@ export default function NewProductPage() {
         // For now, convert to base64 data URLs (in production, you'd upload to a file server)
         Array.from(files).forEach((file) => {
             if (formData.images.length >= 4) {
-                toast.error("Maximum 4 images allowed");
+                toast.error("You can only upload up to 4 images per product.");
                 return;
             }
 

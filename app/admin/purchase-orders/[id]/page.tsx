@@ -80,12 +80,12 @@ export default function PurchaseOrderDetailPage() {
             if (data.success) {
                 setOrder(data.data);
             } else {
-                toast.error("Purchase order not found");
+                toast.error("We couldn't find the purchase order you were looking for.");
                 router.push("/admin/purchase-orders");
             }
         } catch (err) {
             console.error("Failed to fetch order:", err);
-            toast.error("Failed to load order");
+            toast.error("We encountered an issue loading the purchase order details. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -102,14 +102,14 @@ export default function PurchaseOrderDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Purchase order confirmed!");
+                toast.success("Purchase order confirmed successfully! The order is now being processed.");
                 fetchOrder();
             } else {
-                toast.error(data.message || "Failed to confirm order");
+                toast.error(data.message || "We couldn't confirm the order. Please try again.");
             }
         } catch (err) {
             console.error("Failed to confirm order:", err);
-            toast.error("Failed to confirm order");
+            toast.error("An error occurred while confirming the order. Please try again.");
         } finally {
             setProcessing(false);
         }
@@ -126,15 +126,15 @@ export default function PurchaseOrderDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Purchase order cancelled!");
+                toast.success("Purchase order cancelled successfully. It has been marked as cancelled.");
                 setShowCancelDialog(false);
                 fetchOrder();
             } else {
-                toast.error(data.message || "Failed to cancel order");
+                toast.error(data.message || "We couldn't cancel the order. Please try again.");
             }
         } catch (err) {
             console.error("Failed to cancel order:", err);
-            toast.error("Failed to cancel order");
+            toast.error("An error occurred while cancelling the order. Please try again.");
         } finally {
             setProcessing(false);
         }
@@ -153,14 +153,14 @@ export default function PurchaseOrderDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Vendor bill created!");
+                toast.success("Vendor bill created successfully! You can now view it.");
                 fetchOrder();
             } else {
-                toast.error(data.message || "Failed to create vendor bill");
+                toast.error(data.message || "We couldn't create the vendor bill. Please try again.");
             }
         } catch (err) {
             console.error("Failed to create bill:", err);
-            toast.error("Failed to create vendor bill");
+            toast.error("An error occurred while creating the vendor bill. Please try again.");
         } finally {
             setProcessing(false);
         }

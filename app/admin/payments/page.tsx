@@ -58,7 +58,7 @@ export default function PaymentsPage() {
             }
         } catch (err) {
             console.error("Failed to fetch payments:", err);
-            toast.error("Failed to load payments");
+            toast.error("We encountered an issue loading the payments. Please refresh the page.");
         } finally {
             setLoading(false);
         }

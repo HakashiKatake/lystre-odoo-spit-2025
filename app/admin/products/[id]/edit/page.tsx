@@ -85,12 +85,12 @@ export default function EditProductPage() {
                     sizes: product.sizes || [],
                 });
             } else {
-                toast.error("Product not found");
+                toast.error("We couldn't find the product you were looking for.");
                 router.push("/admin/products");
             }
         } catch (err) {
             console.error("Failed to fetch product:", err);
-            toast.error("Failed to load product");
+            toast.error("We encountered an issue loading the product details. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -100,11 +100,11 @@ export default function EditProductPage() {
         e.preventDefault();
 
         if (!formData.name) {
-            toast.error("Please enter a product name");
+            toast.error("The product name is required. Please give your product a name.");
             return;
         }
         if (formData.salesPrice <= 0) {
-            toast.error("Please enter a valid sales price");
+            toast.error("The sales price is invalid. Please enter a value greater than zero.");
             return;
         }
 
@@ -120,14 +120,14 @@ export default function EditProductPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Product updated successfully!");
+                toast.success("Product updated successfully! Your changes have been saved.");
                 router.push(`/admin/products/${params.id}`);
             } else {
-                toast.error(data.message || "Failed to update product");
+                toast.error(data.message || "We couldn't update the product. Please try again.");
             }
         } catch (err) {
             console.error("Failed to update product:", err);
-            toast.error("Failed to update product");
+            toast.error("An error occurred while updating the product. Please try again.");
         } finally {
             setSaving(false);
         }

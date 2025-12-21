@@ -53,12 +53,12 @@ export default function ContactDetailPage() {
                 setContact(data.data);
                 setFormData(data.data);
             } else {
-                toast.error("Contact not found");
+                toast.error("We couldn't find the contact you were looking for.");
                 router.push("/admin/contacts");
             }
         } catch (err) {
             console.error("Failed to fetch contact:", err);
-            toast.error("Failed to load contact");
+            toast.error("We encountered an issue loading the contact details. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -86,15 +86,15 @@ export default function ContactDetailPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Contact updated successfully!");
+                toast.success("Contact updated successfully! Your changes have been saved.");
                 setContact(data.data);
                 setIsEditing(false);
             } else {
-                toast.error(data.message || "Failed to update contact");
+                toast.error(data.message || "We couldn't update the contact information. Please try again.");
             }
         } catch (err) {
             console.error("Failed to save contact:", err);
-            toast.error("Failed to save contact");
+            toast.error("An error occurred while saving the contact. Please try again.");
         } finally {
             setSaving(false);
         }

@@ -80,12 +80,12 @@ export default function InvoiceDetailPage() {
         setInvoice(data.data);
         setPaymentAmount(data.data.amountDue.toString());
       } else {
-        toast.error("Invoice not found");
+        toast.error("We couldn't find the invoice you're looking for.");
         router.push("/invoices");
       }
     } catch (err) {
       console.error("Failed to fetch invoice:", err);
-      toast.error("Failed to load invoice");
+      toast.error("We encountered an issue loading the invoice. Please refresh the page.");
     } finally {
       setLoading(false);
     }
@@ -97,12 +97,12 @@ export default function InvoiceDetailPage() {
 
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) {
-      toast.error("Please enter a valid amount");
+      toast.error("Please enter a valid payment amount.");
       return;
     }
 
     if (amount > invoice.amountDue) {
-      toast.error("Amount cannot exceed amount due");
+      toast.error("The payment amount cannot exceed the amount due.");
       return;
     }
 
@@ -125,15 +125,15 @@ export default function InvoiceDetailPage() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Payment successful!");
+        toast.success("Payment successful! Thank you for your payment.");
         setShowPaymentModal(false);
         fetchInvoice();
       } else {
-        toast.error(data.message || "Payment failed");
+        toast.error(data.message || "We couldn't process your payment. Please try again.");
       }
     } catch (err) {
       console.error("Payment failed:", err);
-      toast.error("Payment failed. Please try again.");
+      toast.error("An error occurred while processing your payment. Please try again.");
     } finally {
       setProcessing(false);
     }

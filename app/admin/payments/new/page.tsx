@@ -40,7 +40,7 @@ function PaymentFormContent() {
         e.preventDefault();
 
         if (formData.amount <= 0) {
-            toast.error("Please enter a valid amount");
+            toast.error("Please enter a valid payment amount greater than zero.");
             return;
         }
 
@@ -59,13 +59,13 @@ function PaymentFormContent() {
             const data = await response.json();
 
             if (data.success) {
-                toast.success("Payment registered successfully!");
+                toast.success("Payment registered successfully! The transaction has been recorded.");
                 router.push("/admin/payments");
             } else {
-                toast.error(data.message || "Failed to register payment");
+                toast.error(data.message || "We couldn't register the payment. Please try again.");
             }
         } catch {
-            toast.error("An error occurred. Please try again.");
+            toast.error("An error occurred while processing the payment. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

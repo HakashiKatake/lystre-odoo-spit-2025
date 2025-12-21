@@ -55,7 +55,7 @@ export default function SaleOrdersPage() {
             }
         } catch (err) {
             console.error("Failed to fetch orders:", err);
-            toast.error("Failed to load orders");
+            toast.error("We encountered an issue loading your sale orders. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -108,13 +108,13 @@ export default function SaleOrdersPage() {
             const data = await res.json();
 
             if (data.success) {
-                toast.success("Invoice created!");
+                toast.success("Invoice created successfully! You can now view it in the Invoices section.");
                 fetchOrders();
             } else {
-                toast.error(data.message || "Failed to create invoice");
+                toast.error(data.message || "We couldn't create the invoice. Please try again.");
             }
         } catch {
-            toast.error("Failed to create invoice");
+            toast.error("An error occurred while creating the invoice. Please try again.");
         }
     };
 

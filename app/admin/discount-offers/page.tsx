@@ -57,7 +57,7 @@ export default function DiscountOffersPage() {
             }
         } catch (err) {
             console.error("Failed to fetch offers:", err);
-            toast.error("Failed to load discount offers");
+            toast.error("We encountered an issue loading the discount offers. Please refresh the page.");
         } finally {
             setLoading(false);
         }
@@ -73,13 +73,13 @@ export default function DiscountOffersPage() {
 
             if (data.success) {
                 setOffers((prev) => prev.filter((o) => o.id !== deleteOffer.id));
-                toast.success("Offer deleted!");
+                toast.success("Discount offer deleted successfully!");
                 setDeleteOffer(null);
             } else {
-                toast.error(data.message || "Failed to delete offer");
+                toast.error(data.message || "We couldn't delete the discount offer. Please try again.");
             }
         } catch {
-            toast.error("Failed to delete offer");
+            toast.error("An error occurred while deleting the offer. Please try again.");
         } finally {
             setDeleting(false);
         }
