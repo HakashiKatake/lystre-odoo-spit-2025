@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
-import { Home, Minus, Plus, ShoppingCart, Check, Truck, RefreshCcw, Shield, Loader2, Package } from 'lucide-react'
+import { Home, Minus, Plus, ShoppingCart, Check, Truck, RefreshCcw, Shield, Loader2, Package, Heart, Ruler } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import { useCartStore } from '@/lib/store'
+import { useCartStore, useWishlistStore, useRecentlyViewedStore } from '@/lib/store'
 import { PRODUCT_COLORS } from '@/lib/constants'
 import { toast } from 'sonner'
 import { Button } from '@/components/retroui/Button'
+import { SizeGuide } from '@/app/components/SizeGuide'
+import { ProductReviews } from '@/app/components/ProductReviews'
+import { RecentlyViewed } from '@/app/components/RecentlyViewed'
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL']
 
@@ -40,7 +43,11 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<string>('')
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [showSizeGuide, setShowSizeGuide] = useState(false)
+  
   const addToCart = useCartStore((state) => state.addItem)
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
+  const addToRecentlyViewed = useRecentlyViewedStore((state) => state.addItem)
 
   // Fetch product - BACKEND LOGIC PRESERVED
   useEffect(() => {
@@ -57,6 +64,15 @@ export default function ProductDetailPage() {
           if (data.data.sizes?.length > 0) {
             setSelectedSize(data.data.sizes[0])
           }
+          
+          // Add to recently viewed
+          addToRecentlyViewed({
+            productId: data.data.id,
+            name: data.data.name,
+            price: data.data.salesPrice,
+            image: data.data.images?.[0],
+            category: data.data.category,
+          })
         } else {
           setError(data.message || 'Product not found')
         }
@@ -71,7 +87,7 @@ export default function ProductDetailPage() {
     if (productId) {
       fetchProduct()
     }
-  }, [productId])
+  }, [productId, addToRecentlyViewed])
 
   const handleAddToCart = () => {
     if (!product) return
@@ -98,7 +114,26 @@ export default function ProductDetailPage() {
       image: product.images?.[0] || undefined,
       tax: product.salesTax,
     })
-    toast.success(`added ${quantity} ${product.name}(s) to your cart!`)
+    toast.success(`Added ${quantity} ${product.name}(s) to your cart!`)
+  }
+
+  const toggleWishlist = () => {
+    if (!product) return
+    
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+      toast.success(`${product.name} removed from wishlist`)
+    } else {
+      addToWishlist({
+        productId: product.id,
+        name: product.name,
+        price: product.salesPrice,
+        image: product.images?.[0],
+        category: product.category,
+        addedAt: new Date(),
+      })
+      toast.success(`${product.name} added to wishlist!`)
+    }
   }
 
   if (loading) {
@@ -128,6 +163,7 @@ export default function ProductDetailPage() {
 
   const images = product.images?.length ? product.images : []
   const availableSizes = product.sizes?.length ? product.sizes : SIZES
+  const inWishlist = isInWishlist(product.id)
 
   return (
     <div className="bg-[#FFFEF9]">
@@ -170,7 +206,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Main Image */}
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <div className="aspect-square border-2 border-[#2B1810] overflow-hidden bg-[#F5EBE0]">
                 {images[selectedImage] ? (
                   <Image 
@@ -187,6 +223,18 @@ export default function ProductDetailPage() {
                   </div>
                 )}
               </div>
+              {/* Wishlist Button on Image */}
+              <button
+                onClick={toggleWishlist}
+                className={`absolute top-4 right-4 p-3 border-2 border-[#2B1810] transition-colors ${
+                  inWishlist ? 'bg-red-50' : 'bg-white hover:bg-[#F5EBE0]'
+                }`}
+              >
+                <Heart
+                  size={24}
+                  className={inWishlist ? 'text-red-500 fill-red-500' : 'text-[#2B1810]'}
+                />
+              </button>
             </div>
           </div>
 
@@ -235,13 +283,22 @@ export default function ProductDetailPage() {
 
             {/* Size Selection */}
             <div>
-              <h3 className="font-semibold text-[#2B1810] mb-3">Select Size</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-[#2B1810]">Select Size</h3>
+                <button
+                  onClick={() => setShowSizeGuide(true)}
+                  className="text-sm text-[#8B7355] hover:underline flex items-center gap-1"
+                >
+                  <Ruler size={14} />
+                  Size Guide
+                </button>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {availableSizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 border-2 font-medium transition-all ${
+                    className={`w-12 h-12 border-2 font-medium transition-all flex items-center justify-center ${
                       selectedSize === size 
                         ? 'border-[#8B7355] bg-[#8B7355] text-white' 
                         : 'border-[#2B1810] bg-white text-[#2B1810] hover:bg-[#F5EBE0]'
@@ -323,15 +380,27 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Add to Cart Button */}
-            <Button 
-              onClick={handleAddToCart}
-              className="w-full py-4 text-lg bg-[#8B7355] text-white border-2 border-[#2B1810] hover:bg-[#6B5344]"
-              disabled={product.stock <= 0}
-            >
-              <ShoppingCart size={20} className="mr-2" />
-              {product.stock <= 0 ? 'Out of Stock' : `Add to Cart - ${formatCurrency(product.salesPrice * quantity)}`}
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleAddToCart}
+                className="flex-1 py-4 text-lg bg-[#8B7355] text-white border-2 border-[#2B1810] hover:bg-[#6B5344]"
+                disabled={product.stock <= 0}
+              >
+                <ShoppingCart size={20} className="mr-2" />
+                {product.stock <= 0 ? 'Out of Stock' : `Add to Cart - ${formatCurrency(product.salesPrice * quantity)}`}
+              </Button>
+              <Button
+                onClick={toggleWishlist}
+                variant="outline"
+                className={`py-4 px-4 border-2 border-[#2B1810] ${inWishlist ? 'bg-red-50' : ''}`}
+              >
+                <Heart
+                  size={20}
+                  className={inWishlist ? 'text-red-500 fill-red-500' : 'text-[#2B1810]'}
+                />
+              </Button>
+            </div>
 
             {/* Features */}
             <div className="border-2 border-[#2B1810] p-6 bg-[#F5EBE0]">
@@ -376,7 +445,18 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Product Reviews Section */}
+        <ProductReviews productId={product.id} productName={product.name} />
+
+        {/* Recently Viewed Section */}
+        <div className="mt-8">
+          <RecentlyViewed currentProductId={product.id} maxItems={4} />
+        </div>
       </main>
+
+      {/* Size Guide Modal */}
+      <SizeGuide isOpen={showSizeGuide} onClose={() => setShowSizeGuide(false)} productType={product.type} />
     </div>
   )
 }

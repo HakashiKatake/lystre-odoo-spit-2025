@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, User } from "lucide-react";
-import { useCartStore } from "@/lib/store";
+import { ShoppingCart, User, Sparkles, Package, Heart } from "lucide-react";
+import { useCartStore, useWishlistStore } from "@/lib/store";
 import { Button } from "@/components/retroui/Button";
 
 interface UserProfile {
@@ -14,10 +14,13 @@ interface UserProfile {
 
 export function CustomerNavbar() {
   const pathname = usePathname();
-  const items = useCartStore((state) => state.items);
+  const cartItems = useCartStore((state) => state.items);
+  const wishlistItems = useWishlistStore((state) => state.items);
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const fetchUser = async () => {
       try {
         const res = await fetch("/api/auth/me");
@@ -60,29 +63,54 @@ export function CustomerNavbar() {
                 Shop
               </Button>
             </Link>
-            <Link href="/account">
+            <Link href="/find-your-fit">
               <Button
                 variant="outline"
-                className={`border-2 border-[#2B1810] ${pathname.startsWith("/account") ? "bg-[#F5EBE0]" : ""}`}
+                className={`border-2 border-[#2B1810] flex items-center gap-1 ${pathname.startsWith("/find-your-fit") ? "bg-[#F5EBE0]" : ""}`}
               >
-                My Account
+                <Sparkles size={14} />
+                Find Your Fit
+              </Button>
+            </Link>
+            <Link href="/orders">
+              <Button
+                variant="outline"
+                className={`border-2 border-[#2B1810] flex items-center gap-1 ${pathname.startsWith("/orders") ? "bg-[#F5EBE0]" : ""}`}
+              >
+                <Package size={14} />
+                My Orders
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Right: Cart + User */}
+        {/* Right: Wishlist + Cart + User */}
         <div className="flex items-center space-x-4">
-          <Link href="/cart">
+          {/* Wishlist */}
+          <Link href="/wishlist">
             <button className="p-2 hover:bg-[#F5EBE0] transition-colors relative border-2 border-[#2B1810]">
-              <ShoppingCart className="w-5 h-5 text-[#2B1810]" />
-              {items.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#8B7355] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#2B1810]">
-                  {items.length}
+              <Heart className={`w-5 h-5 ${pathname.startsWith("/wishlist") ? "text-red-500 fill-red-500" : "text-[#2B1810]"}`} />
+              {mounted && wishlistItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#2B1810]">
+                  {wishlistItems.length}
                 </span>
               )}
             </button>
           </Link>
+
+          {/* Cart */}
+          <Link href="/cart">
+            <button className="p-2 hover:bg-[#F5EBE0] transition-colors relative border-2 border-[#2B1810]">
+              <ShoppingCart className="w-5 h-5 text-[#2B1810]" />
+              {mounted && cartItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#8B7355] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#2B1810]">
+                  {cartItems.length}
+                </span>
+              )}
+            </button>
+          </Link>
+
+          {/* User */}
           {user ? (
             <Link href="/account">
               <div className="flex items-center space-x-2 px-4 py-2 bg-[#F5EBE0] border-2 border-[#2B1810] hover:bg-[#E5D4C1] transition-colors cursor-pointer">

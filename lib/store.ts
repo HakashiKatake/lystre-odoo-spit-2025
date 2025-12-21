@@ -185,3 +185,105 @@ export const useFilterStore = create<FilterState>((set) => ({
             sortBy: 'newest',
         }),
 }))
+
+// ============== WISHLIST STORE ==============
+
+export interface WishlistItem {
+    productId: string
+    name: string
+    price: number
+    image?: string
+    category: string
+    addedAt: Date
+}
+
+interface WishlistState {
+    items: WishlistItem[]
+    addItem: (item: WishlistItem) => void
+    removeItem: (productId: string) => void
+    isInWishlist: (productId: string) => boolean
+    clearWishlist: () => void
+    getItemCount: () => number
+}
+
+export const useWishlistStore = create<WishlistState>()(
+    persist(
+        (set, get) => ({
+            items: [],
+
+            addItem: (item) =>
+                set((state) => {
+                    const exists = state.items.find((i) => i.productId === item.productId)
+                    if (exists) return state
+                    return { items: [...state.items, { ...item, addedAt: new Date() }] }
+                }),
+
+            removeItem: (productId) =>
+                set((state) => ({
+                    items: state.items.filter((i) => i.productId !== productId),
+                })),
+
+            isInWishlist: (productId) => {
+                const { items } = get()
+                return items.some((i) => i.productId === productId)
+            },
+
+            clearWishlist: () => set({ items: [] }),
+
+            getItemCount: () => {
+                const { items } = get()
+                return items.length
+            },
+        }),
+        {
+            name: 'lystre-wishlist',
+        }
+    )
+)
+
+// ============== RECENTLY VIEWED STORE ==============
+
+export interface RecentlyViewedItem {
+    productId: string
+    name: string
+    price: number
+    image?: string
+    category: string
+    viewedAt: Date
+}
+
+interface RecentlyViewedState {
+    items: RecentlyViewedItem[]
+    addItem: (item: Omit<RecentlyViewedItem, 'viewedAt'>) => void
+    clearHistory: () => void
+    getRecentItems: (limit?: number) => RecentlyViewedItem[]
+}
+
+export const useRecentlyViewedStore = create<RecentlyViewedState>()(
+    persist(
+        (set, get) => ({
+            items: [],
+
+            addItem: (item) =>
+                set((state) => {
+                    // Remove if already exists
+                    const filtered = state.items.filter((i) => i.productId !== item.productId)
+                    // Add to front with timestamp
+                    const newItems = [{ ...item, viewedAt: new Date() }, ...filtered]
+                    // Keep only last 20 items
+                    return { items: newItems.slice(0, 20) }
+                }),
+
+            clearHistory: () => set({ items: [] }),
+
+            getRecentItems: (limit = 10) => {
+                const { items } = get()
+                return items.slice(0, limit)
+            },
+        }),
+        {
+            name: 'lystre-recently-viewed',
+        }
+    )
+)
+

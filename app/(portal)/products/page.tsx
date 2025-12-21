@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Search, ShoppingCart, Loader2, Package, X } from "lucide-react";
-import { useCartStore } from "@/lib/store";
+import { ChevronDown, Search, ShoppingCart, Loader2, Package, X, Heart } from "lucide-react";
+import { useCartStore, useWishlistStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/utils";
 import { PRODUCT_TYPES, PRODUCT_CATEGORIES, PRODUCT_MATERIALS, PRODUCT_COLORS } from "@/lib/constants";
 import { Button } from "@/components/retroui/Button";
@@ -46,6 +46,25 @@ export default function ProductsPage() {
 
   // Cart store - Backend logic
   const addToCart = useCartStore((state) => state.addItem);
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
+
+  // Toggle wishlist
+  const toggleWishlist = (product: Product) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+      toast.success(`${product.name} removed from wishlist`);
+    } else {
+      addToWishlist({
+        productId: product.id,
+        name: product.name,
+        price: product.salesPrice,
+        image: product.images?.[0],
+        category: product.category,
+        addedAt: new Date(),
+      });
+      toast.success(`${product.name} added to wishlist!`);
+    }
+  };
 
   // Fetch products from API - BACKEND LOGIC PRESERVED
   useEffect(() => {
@@ -291,7 +310,7 @@ export default function ProductsPage() {
           <div className="mb-6">
             <div className="flex items-stretch gap-4">
               <div className="relative flex-1 max-w-xl flex items-center">
-                <div className="absolute left-4 flex items-center justify-center">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
                   <Search className="w-5 h-5 text-[#8B7355]" />
                 </div>
                 <input
@@ -299,12 +318,12 @@ export default function ProductsPage() {
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-12 border-2 border-[#2B1810] focus:outline-none focus:ring-2 focus:ring-[#8B7355] bg-white text-[#2B1810] placeholder-[#8B7355]"
+                  className="w-full h-12 pl-12 pr-12 border-2 border-[#2B1810] rounded-none focus:outline-none focus:ring-2 focus:ring-[#8B7355] bg-white text-[#2B1810] placeholder-[#8B7355]"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-4 flex items-center justify-center p-1 hover:bg-[#F5EBE0] rounded"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center p-1 hover:bg-[#F5EBE0] rounded"
                   >
                     <X className="w-4 h-4 text-[#8B7355]" />
                   </button>
@@ -371,6 +390,21 @@ export default function ProductsPage() {
                         <Package size={48} className="text-[#8B7355]" />
                       </div>
                     )}
+                    {/* Wishlist Button */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleWishlist(product);
+                      }}
+                      className={`absolute top-3 left-3 p-2 border-2 border-[#2B1810] transition-colors z-10 ${
+                        isInWishlist(product.id) ? 'bg-red-50' : 'bg-white hover:bg-[#F5EBE0]'
+                      }`}
+                    >
+                      <Heart
+                        size={16}
+                        className={isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-[#2B1810]'}
+                      />
+                    </button>
                     {product.stock <= 0 && (
                       <div className="absolute top-3 right-3 bg-[#EF4444] text-white text-xs px-3 py-1 border-2 border-[#2B1810]">
                         Out of Stock
