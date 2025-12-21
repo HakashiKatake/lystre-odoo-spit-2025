@@ -40,6 +40,22 @@ const SIZES = ["S", "M", "L", "XL", "XXL"];
 const CATEGORIES = ["men", "women", "kids", "accessories", "home", "electronics", "books", "other"];
 const TYPES = ["shirt", "pants", "dress", "kurta", "saree", "shoes", "bag", "watch", "jewelry", "other"];
 const STATUSES = ["new", "confirmed", "archived"];
+const PRODUCT_COLORS = [
+    { value: "black", label: "Black", hex: "#000000" },
+    { value: "white", label: "White", hex: "#FFFFFF" },
+    { value: "red", label: "Red", hex: "#EF4444" },
+    { value: "blue", label: "Blue", hex: "#3B82F6" },
+    { value: "green", label: "Green", hex: "#22C55E" },
+    { value: "yellow", label: "Yellow", hex: "#EAB308" },
+    { value: "pink", label: "Pink", hex: "#EC4899" },
+    { value: "purple", label: "Purple", hex: "#8B5CF6" },
+    { value: "orange", label: "Orange", hex: "#F97316" },
+    { value: "brown", label: "Brown", hex: "#8B7355" },
+    { value: "gray", label: "Gray", hex: "#6B7280" },
+    { value: "navy", label: "Navy", hex: "#1E3A5F" },
+    { value: "beige", label: "Beige", hex: "#F5F5DC" },
+    { value: "maroon", label: "Maroon", hex: "#800000" },
+];
 
 export default function EditProductPage() {
     const params = useParams();
@@ -60,6 +76,7 @@ export default function EditProductPage() {
         published: false,
         status: "new",
         sizes: [] as string[],
+        colors: [] as string[],
         images: [] as string[],
     });
 
@@ -87,6 +104,7 @@ export default function EditProductPage() {
                     published: product.published || false,
                     status: product.status || "new",
                     sizes: product.sizes || [],
+                    colors: product.colors || [],
                     images: product.images || [],
                 });
             } else {
@@ -144,6 +162,15 @@ export default function EditProductPage() {
             sizes: prev.sizes.includes(size)
                 ? prev.sizes.filter((s) => s !== size)
                 : [...prev.sizes, size],
+        }));
+    };
+
+    const toggleColor = (color: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            colors: prev.colors.includes(color)
+                ? prev.colors.filter((c) => c !== color)
+                : [...prev.colors, color],
         }));
     };
 
@@ -287,6 +314,31 @@ export default function EditProductPage() {
                                     {formData.sizes.length > 0 && (
                                         <p className="text-sm text-gray-500 font-bold mt-2">
                                             Selected: {formData.sizes.join(", ")}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="col-span-2">
+                                    <Label className="text-black font-bold">Available Colors</Label>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {PRODUCT_COLORS.map((color) => (
+                                            <button
+                                                key={color.value}
+                                                type="button"
+                                                onClick={() => toggleColor(color.value)}
+                                                className={`w-8 h-8 rounded-full border-2 transition-all ${
+                                                    formData.colors.includes(color.value)
+                                                        ? "border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ring-2 ring-lystre-brown scale-110"
+                                                        : "border-black hover:scale-105"
+                                                }`}
+                                                style={{ backgroundColor: color.hex }}
+                                                title={color.label}
+                                            />
+                                        ))}
+                                    </div>
+                                    {formData.colors.length > 0 && (
+                                        <p className="text-sm text-gray-500 font-bold mt-2">
+                                            Selected: {formData.colors.join(", ")}
                                         </p>
                                     )}
                                 </div>

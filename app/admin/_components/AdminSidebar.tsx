@@ -14,7 +14,8 @@ import {
     LogOut,
     ChevronRight,
     Circle,
-    LayoutDashboard
+    LayoutDashboard,
+    Star
 } from "lucide-react";
 import { useState } from "react";
 
@@ -28,6 +29,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Products", href: "/admin/products", icon: Package },
+    { label: "Reviews", href: "/admin/reviews", icon: Star },
     {
         label: "Billing & Payments",
         href: "/admin/billing", // Changed to generic billing since subitems exist

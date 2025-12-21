@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Edit, Trash2, Package, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Package, Loader2, Star, User, ThumbsUp } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { Button } from "@/components/retroui/Button";
@@ -36,16 +36,31 @@ interface Product {
     updatedAt: string;
 }
 
+interface Review {
+    id: string;
+    rating: number;
+    title: string;
+    comment: string;
+    userName: string;
+    sizePurchased?: string;
+    bodyType?: string;
+    helpfulCount: number;
+    verified: boolean;
+    createdAt: string;
+}
+
 export default function ProductDetailPage() {
     const params = useParams();
     const router = useRouter();
     const [product, setProduct] = useState<Product | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         fetchProduct();
+        fetchReviews();
     }, [params.id]);
 
     const fetchProduct = async () => {
@@ -64,6 +79,18 @@ export default function ProductDetailPage() {
             toast.error("We encountered an issue loading the product details. Please refresh the page.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchReviews = async () => {
+        try {
+            const res = await fetch(`/api/reviews?productId=${params.id}`);
+            const data = await res.json();
+            if (data.success) {
+                setReviews(data.data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch reviews:", err);
         }
     };
 
@@ -284,6 +311,94 @@ export default function ProductDetailPage() {
                             </div>
                         </div>
                     )}
+
+                    {/* Customer Reviews */}
+                    <div className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                        <div className="p-4 border-b-2 border-black bg-gray-50 flex items-center justify-between">
+                            <h3 className="font-bold text-lg font-serif">Customer Reviews</h3>
+                            {reviews.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <div className="flex">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <Star
+                                                key={star}
+                                                size={16}
+                                                className={
+                                                    star <= Math.round(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length)
+                                                        ? "fill-yellow-400 text-yellow-400"
+                                                        : "text-gray-200"
+                                                }
+                                            />
+                                        ))}
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-600">
+                                        ({reviews.length} review{reviews.length !== 1 ? 's' : ''})
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-6">
+                            {reviews.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <Star size={40} className="mx-auto text-gray-200 mb-2" />
+                                    <p className="text-gray-500 font-bold">No reviews yet</p>
+                                    <p className="text-sm text-gray-400">Customers haven't reviewed this product yet.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {reviews.slice(0, 5).map((review) => (
+                                        <div key={review.id} className="border-b border-black/10 pb-4 last:border-0 last:pb-0">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <div className="flex">
+                                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                                <Star
+                                                                    key={star}
+                                                                    size={14}
+                                                                    className={
+                                                                        star <= review.rating
+                                                                            ? "fill-yellow-400 text-yellow-400"
+                                                                            : "text-gray-200"
+                                                                    }
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        {review.verified && (
+                                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-500 font-bold">
+                                                                Verified
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="font-bold">{review.title}</p>
+                                                </div>
+                                                <span className="text-xs text-gray-400 font-bold">{formatDate(review.createdAt)}</span>
+                                            </div>
+                                            <p className="text-gray-600 text-sm mb-2">{review.comment}</p>
+                                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                                                <span className="flex items-center gap-1 font-bold">
+                                                    <User size={12} /> {review.userName}
+                                                </span>
+                                                {review.sizePurchased && (
+                                                    <span className="font-bold">Size: {review.sizePurchased}</span>
+                                                )}
+                                                <span className="flex items-center gap-1 font-bold">
+                                                    <ThumbsUp size={12} /> {review.helpfulCount} helpful
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {reviews.length > 5 && (
+                                        <Link href="/admin/reviews" className="block text-center">
+                                            <Button variant="outline" className="bg-white hover:bg-gray-100 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                                                View All {reviews.length} Reviews
+                                            </Button>
+                                        </Link>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Sidebar */}
