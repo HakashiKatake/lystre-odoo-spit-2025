@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -33,8 +33,25 @@ export default function CartPage() {
   const [couponError, setCouponError] = useState("");
   const [couponSuccess, setCouponSuccess] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Apply coupon - BACKEND LOGIC PRESERVED
+  // Fetch user for coupon validation
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (data.success && data.data?.contactId) {
+          setUserId(data.data.contactId);
+        }
+      } catch {
+        // User not logged in - coupons without customer restriction will still work
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Apply coupon - BACKEND LOGIC PRESERVED (with customerId fix)
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) {
       setCouponError("Please enter a coupon code");
@@ -49,7 +66,10 @@ export default function CartPage() {
       const res = await fetch("/api/coupons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponInput.toUpperCase() }),
+        body: JSON.stringify({ 
+          code: couponInput.toUpperCase(),
+          customerId: userId, // Include customer's contact ID for validation
+        }),
       });
 
       const data = await res.json();
