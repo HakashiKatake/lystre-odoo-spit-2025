@@ -27,6 +27,7 @@ interface Product {
   stock: number
   salesPrice: number
   salesTax: number
+  discountPercentage?: number | null
   description?: string
   published: boolean
   images?: string[]
@@ -248,12 +249,35 @@ export default function ProductDetailPage() {
                   {product.type}
                 </span>
               </div>
-              <p className="text-3xl font-bold text-[#8B7355] mt-4">
-                {formatCurrency(product.salesPrice)}
-              </p>
-              <p className="text-sm text-[#8B7355] mt-1">
-                Inclusive of all taxes
-              </p>
+              
+              {/* Price with Discount */}
+              {product.discountPercentage && product.discountPercentage > 0 ? (
+                <div className="mt-4">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-bold text-[#22C55E]">
+                      {formatCurrency(product.salesPrice * (1 - product.discountPercentage / 100))}
+                    </span>
+                    <span className="text-lg text-[#8B7355] line-through">
+                      M.R.P: {formatCurrency(product.salesPrice)}
+                    </span>
+                    <span className="px-2 py-1 bg-[#22C55E] text-white text-sm font-bold border-2 border-[#2B1810]">
+                      {product.discountPercentage}% OFF
+                    </span>
+                  </div>
+                  <p className="text-sm text-[#8B7355] mt-1">
+                    Inclusive of all taxes
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold text-[#8B7355] mt-4">
+                    {formatCurrency(product.salesPrice)}
+                  </p>
+                  <p className="text-sm text-[#8B7355] mt-1">
+                    Inclusive of all taxes
+                  </p>
+                </>
+              )}
               {product.stock <= 5 && product.stock > 0 && (
                 <span className="inline-block mt-2 px-3 py-1 bg-[#F59E0B] text-white text-sm border-2 border-[#2B1810]">
                   Only {product.stock} left!

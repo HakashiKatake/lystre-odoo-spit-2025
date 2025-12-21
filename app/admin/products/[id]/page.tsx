@@ -28,6 +28,7 @@ interface Product {
     salesPrice: number;
     costPrice: number;
     salesTax: number;
+    discountPercentage?: number | null;
     published: boolean;
     status: string;
     images?: string[];
@@ -243,6 +244,26 @@ export default function ProductDetailPage() {
                                     </p>
                                 </div>
                             </div>
+                            {/* Discount Display */}
+                            {product.discountPercentage && product.discountPercentage > 0 && (
+                                <div className="mt-4 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-green-700 font-bold">Discount Applied</p>
+                                            <p className="text-2xl font-bold text-green-700">{product.discountPercentage}% OFF</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm text-gray-500 font-bold">Final Price</p>
+                                            <p className="text-xl font-bold text-green-700">
+                                                {formatCurrency(product.salesPrice * (1 - product.discountPercentage / 100))}
+                                            </p>
+                                            <p className="text-sm text-gray-400 line-through">
+                                                {formatCurrency(product.salesPrice)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

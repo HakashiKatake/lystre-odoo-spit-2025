@@ -69,6 +69,7 @@ export const productSchema = z.object({
     stock: z.number().int().min(0, 'Stock cannot be negative'),
     salesPrice: z.number().positive('Sales price must be positive'),
     salesTax: z.number().min(0).max(100, 'Tax must be between 0 and 100'),
+    discountPercentage: z.number().min(0).max(100, 'Discount must be between 0 and 100').optional().nullable(),
     purchasePrice: z.number().positive('Purchase price must be positive'),
     purchaseTax: z.number().min(0).max(100, 'Tax must be between 0 and 100'),
     published: z.boolean().default(false),

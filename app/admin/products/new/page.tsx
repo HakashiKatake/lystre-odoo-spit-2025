@@ -29,6 +29,7 @@ export default function NewProductPage() {
         stock: 0,
         salesPrice: 0,
         salesTax: 10,
+        discountPercentage: 0,
         purchasePrice: 0,
         purchaseTax: 10,
         published: false,
@@ -363,6 +364,33 @@ export default function NewProductPage() {
                                             step="0.1"
                                             className="border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white mt-1"
                                         />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <Label className="text-black font-bold flex items-center gap-2">
+                                            Discount (%)
+                                            {formData.discountPercentage > 0 && (
+                                                <span className="text-xs px-2 py-0.5 bg-green-500 text-white rounded-full">
+                                                    {formData.discountPercentage}% OFF
+                                                </span>
+                                            )}
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            value={formData.discountPercentage}
+                                            onChange={(e) => setFormData((p) => ({ ...p, discountPercentage: parseFloat(e.target.value) || 0 }))}
+                                            min="0"
+                                            max="100"
+                                            step="1"
+                                            placeholder="0"
+                                            className="border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white mt-1"
+                                        />
+                                        {formData.discountPercentage > 0 && formData.salesPrice > 0 && (
+                                            <p className="text-sm mt-2 text-green-600 font-bold">
+                                                Final Price: ₹{(formData.salesPrice * (1 - formData.discountPercentage / 100)).toFixed(2)}
+                                                <span className="text-gray-400 line-through ml-2">₹{formData.salesPrice}</span>
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

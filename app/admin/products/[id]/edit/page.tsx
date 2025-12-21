@@ -55,6 +55,7 @@ export default function EditProductPage() {
         salesPrice: 0,
         costPrice: 0,
         salesTax: 10,
+        discountPercentage: 0,
         published: false,
         status: "new",
         sizes: [] as string[],
@@ -80,6 +81,7 @@ export default function EditProductPage() {
                     salesPrice: product.salesPrice || 0,
                     costPrice: product.costPrice || 0,
                     salesTax: product.salesTax || 10,
+                    discountPercentage: product.discountPercentage || 0,
                     published: product.published || false,
                     status: product.status || "new",
                     sizes: product.sizes || [],
@@ -310,6 +312,32 @@ export default function EditProductPage() {
                                             min={0}
                                             className="border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white mt-1"
                                         />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <Label htmlFor="discountPercentage" className="text-black font-bold flex items-center gap-2">
+                                            Discount (%)
+                                            {formData.discountPercentage > 0 && (
+                                                <span className="text-xs px-2 py-0.5 bg-green-500 text-white rounded-full">
+                                                    {formData.discountPercentage}% OFF
+                                                </span>
+                                            )}
+                                        </Label>
+                                        <Input
+                                            id="discountPercentage"
+                                            type="number"
+                                            value={formData.discountPercentage}
+                                            onChange={(e) => setFormData((f) => ({ ...f, discountPercentage: parseFloat(e.target.value) || 0 }))}
+                                            min={0}
+                                            max={100}
+                                            placeholder="0"
+                                            className="border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white mt-1"
+                                        />
+                                        {formData.discountPercentage > 0 && formData.salesPrice > 0 && (
+                                            <p className="text-sm mt-2 text-green-600 font-bold">
+                                                Final Price: ₹{(formData.salesPrice * (1 - formData.discountPercentage / 100)).toFixed(2)}
+                                                <span className="text-gray-400 line-through ml-2">₹{formData.salesPrice}</span>
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

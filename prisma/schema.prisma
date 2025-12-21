@@ -97,6 +97,7 @@ model Product {
   stock              Int                 @default(0)
   salesPrice         Float
   salesTax           Float               @default(0)
+  discountPercentage Float?              // Product-level discount (0-100)
   purchasePrice      Float
   purchaseTax        Float               @default(0)
   published          Boolean             @default(false)

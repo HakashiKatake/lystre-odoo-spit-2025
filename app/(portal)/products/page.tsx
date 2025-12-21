@@ -24,6 +24,7 @@ interface Product {
   stock: number;
   salesPrice: number;
   salesTax: number;
+  discountPercentage?: number | null;
   published: boolean;
   images?: string[];
 }
@@ -421,9 +422,27 @@ export default function ProductsPage() {
                   <div className="p-4">
                     <p className="text-xs text-[#8B7355] uppercase tracking-wider mb-1">{product.category}</p>
                     <h3 className="text-lg font-serif text-[#2B1810] mb-2 line-clamp-1">{product.name}</h3>
-                    <p className="text-xl font-bold text-[#8B7355] mb-4">
-                      {formatCurrency(product.salesPrice)}
-                    </p>
+                    
+                    {/* Price with Discount */}
+                    {product.discountPercentage && product.discountPercentage > 0 ? (
+                      <div className="mb-4">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xl font-bold text-[#22C55E]">
+                            {formatCurrency(product.salesPrice * (1 - product.discountPercentage / 100))}
+                          </span>
+                          <span className="text-sm text-[#8B7355] line-through">
+                            M.R.P: {formatCurrency(product.salesPrice)}
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold text-[#22C55E]">
+                          ({product.discountPercentage}% off)
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-xl font-bold text-[#8B7355] mb-4">
+                        {formatCurrency(product.salesPrice)}
+                      </p>
+                    )}
                     
                     {/* Buttons */}
                     <div className="flex gap-2">
