@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { generateOrderNumber } from '@/lib/utils'
 import type { SaleOrderInput, PurchaseOrderInput } from '@/lib/validators'
 import type { Prisma } from '@prisma/client/index.js'
+import { triggerN8NWebhook } from '@/lib/n8n-webhook'
 
 // ============== SALE ORDER SERVICE ==============
 
@@ -104,10 +105,25 @@ export async function confirmSaleOrder(orderId: string) {
         }
     })
 
-    return prisma.saleOrder.findUnique({
+    const confirmedOrder = await prisma.saleOrder.findUnique({
         where: { id: orderId },
         include: { customer: true, lines: { include: { product: true } } },
     })
+
+    if (confirmedOrder) {
+        await triggerN8NWebhook({
+            trigger_type: 'order_confirmation',
+            customer_name: confirmedOrder.customer.name,
+            customer_email: [confirmedOrder.customer.email],
+            order_id: confirmedOrder.orderNumber,
+            order_status: confirmedOrder.status,
+            order_total: confirmedOrder.totalAmount,
+            tracking_link: `https://lystre.com/track/${confirmedOrder.id}`,
+            support_email: 'support@lystre.com',
+        })
+    }
+
+    return confirmedOrder
 }
 
 export async function cancelSaleOrder(orderId: string) {

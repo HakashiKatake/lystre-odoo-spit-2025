@@ -103,6 +103,44 @@ export async function POST(request: NextRequest) {
                 data: couponsToCreate,
             })
 
+            // Trigger webhooks for generated coupons
+            // Note: This might be heavy if lots of coupons but matches requirement for "each mail"
+            // We'll fetch the created coupons (or at least the contacts) to send details
+            // Since createMany doesn't return the records, we have to find them or iterate.
+            // Optimization: Send one batch or iterate customerIds.
+
+            // For now, simpler approach: Just trigger for each customerId provided (if available) 
+            // If bulk quantity with no customerId, we can't send emails.
+            if (customerIds && customerIds.length > 0) {
+                // Fetch offer details once
+                const offer = await prisma.discountOffer.findUnique({ where: { id: discountOfferId } })
+                if (offer) {
+                    // We need the codes... createMany doesn't give them.
+                    // To follow the requirement "send relevant data... discount_code", we strictly need the codes.
+                    // This implies we should have created them one by one or fetch them back.
+                    // Given the constraint to not alter logic deeply, we will just send a generic "Offer Assigned" 
+                    // or if we really need the code, we must fetch.
+                    // Let's assume we fetch the latest coupons for these users.
+                    const newCoupons = await prisma.coupon.findMany({
+                        where: { discountOfferId, contactId: { in: customerIds } },
+                        include: { contact: true }
+                    })
+
+                    for (const c of newCoupons) {
+                        if (c.contact) {
+                            await triggerN8NWebhook({
+                                trigger_type: 'offer_campaign',
+                                customer_name: c.contact.name,
+                                customer_email: [c.contact.email],
+                                discount_value: `${offer.discountPercentage}%`,
+                                discount_code: c.code,
+                                expiry_date: c.expirationDate || offer.endDate,
+                            })
+                        }
+                    }
+                }
+            }
+
             return NextResponse.json({
                 success: true,
                 message: `${coupons.count} coupons created successfully`,

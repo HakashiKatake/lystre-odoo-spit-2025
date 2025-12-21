@@ -108,7 +108,16 @@ export async function POST(request: NextRequest) {
         })
 
         // Trigger webhook for invoice creation
-        await triggerN8NWebhook({ data: 'invoice' })
+        await triggerN8NWebhook({
+            trigger_type: 'invoice_generated',
+            customer_name: invoice.customer.name,
+            customer_email: [invoice.customer.email],
+            order_id: invoice.order.orderNumber,
+            payment_status: invoice.status,
+            order_total: invoice.totalAmount,
+            invoice_link: `https://lystre.com/invoice/${invoice.id}.pdf`,
+            year: new Date().getFullYear(),
+        })
 
         return NextResponse.json({
             success: true,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { triggerN8NWebhook } from '@/lib/n8n-webhook'
 
 // GET /api/sale-orders/[id]
 export async function GET(
@@ -44,7 +45,7 @@ export async function POST(
         const { id } = await params
         const order = await prisma.saleOrder.findUnique({
             where: { id },
-            include: { lines: true },
+            include: { lines: true, customer: true },
         })
 
         if (!order) {
@@ -97,7 +98,16 @@ export async function POST(
         })
 
         // Trigger n8n webhook
-        await triggerWebhook('order.confirmed', { orderId: id, orderNumber: order.orderNumber })
+        await triggerN8NWebhook({
+            trigger_type: 'order_confirmation',
+            customer_name: order.customer.name,
+            customer_email: [order.customer.email],
+            order_id: order.orderNumber,
+            order_status: 'CONFIRMED',
+            order_total: order.totalAmount,
+            tracking_link: `https://lystre.com/track/${order.id}`,
+            support_email: 'support@lystre.com',
+        })
 
         return NextResponse.json({
             success: true,
@@ -168,17 +178,3 @@ export async function DELETE(
 }
 
 // n8n webhook trigger helper
-async function triggerWebhook(event: string, data: Record<string, unknown>) {
-    const webhookUrl = process.env.N8N_WEBHOOK_URL
-    if (!webhookUrl) return
-
-    try {
-        await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ event, data, timestamp: new Date().toISOString() }),
-        })
-    } catch (error) {
-        console.error('Webhook trigger failed:', error)
-    }
-}
