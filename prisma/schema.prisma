@@ -61,6 +61,7 @@ model User {
   pincode      String?
   contactId    String?   @unique
   contact      Contact?  @relation(fields: [contactId], references: [id])
+  reviews      Review[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -105,6 +106,7 @@ model Product {
   updatedAt          DateTime            @updatedAt
   saleOrderLines     SaleOrderLine[]
   purchaseOrderLines PurchaseOrderLine[]
+  reviews            Review[]
 }
 
 model PaymentTerm {
@@ -266,4 +268,23 @@ model Payment {
 model Settings {
   id                 String  @id @default("settings")
   automaticInvoicing Boolean @default(true)
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  userName      String
+  rating        Int      // 1-5 stars
+  title         String
+  comment       String
+  sizePurchased String?
+  bodyType      String?
+  images        String[]
+  helpfulCount  Int      @default(0)
+  verified      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
