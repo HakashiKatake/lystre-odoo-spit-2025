@@ -312,7 +312,6 @@ export default function ProductsPage() {
             <div className="flex items-stretch gap-4">
               <div className="relative flex-1 max-w-xl flex items-center">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
-                  <Search className="w-5 h-5 text-[#8B7355]" />
                 </div>
                 <input
                   type="text"
