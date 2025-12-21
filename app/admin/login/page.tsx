@@ -111,7 +111,13 @@ function AdminLoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4 font-mono">
+    <div
+      className="min-h-screen flex items-center justify-center bg-white p-4 font-mono"
+      style={{
+        backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
+        backgroundSize: "24px 24px",
+      }}
+    >
       <Card className="w-full max-w-md border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none bg-white">
         <CardHeader className="text-center space-y-4 border-b-4 border-black pb-6">
           <div className="mx-auto w-16 h-16 bg-amber-400 border-4 border-black flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
