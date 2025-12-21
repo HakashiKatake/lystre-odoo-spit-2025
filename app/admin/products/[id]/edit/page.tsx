@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, X, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/retroui/Button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,7 @@ const STATUSES = ["new", "confirmed", "archived"];
 export default function EditProductPage() {
     const params = useParams();
     const router = useRouter();
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({
@@ -59,6 +60,7 @@ export default function EditProductPage() {
         published: false,
         status: "new",
         sizes: [] as string[],
+        images: [] as string[],
     });
 
     useEffect(() => {
@@ -85,6 +87,7 @@ export default function EditProductPage() {
                     published: product.published || false,
                     status: product.status || "new",
                     sizes: product.sizes || [],
+                    images: product.images || [],
                 });
             } else {
                 toast.error("We couldn't find the product you were looking for.");
@@ -141,6 +144,35 @@ export default function EditProductPage() {
             sizes: prev.sizes.includes(size)
                 ? prev.sizes.filter((s) => s !== size)
                 : [...prev.sizes, size],
+        }));
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        Array.from(files).forEach((file) => {
+            if (formData.images.length >= 4) {
+                toast.error("You can only upload up to 4 images per product.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result as string;
+                setFormData((prev) => ({
+                    ...prev,
+                    images: [...prev.images, base64],
+                }));
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const removeImage = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index),
         }));
     };
 
@@ -346,6 +378,62 @@ export default function EditProductPage() {
 
                     {/* Sidebar */}
                     <div className="space-y-6">
+                        {/* Images */}
+                        <div className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                            <div className="p-4 border-b-2 border-black bg-gray-50">
+                                <h3 className="font-bold text-lg font-serif">Images</h3>
+                            </div>
+                            <div className="p-6">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleImageUpload}
+                                    className="hidden"
+                                />
+                                <div className="grid grid-cols-2 gap-3">
+                                    {[0, 1, 2, 3].map((index) => (
+                                        <div
+                                            key={index}
+                                            onClick={() => !formData.images[index] && fileInputRef.current?.click()}
+                                            className={`aspect-square bg-gray-50 rounded-lg flex items-center justify-center border-2 border-black ${
+                                                !formData.images[index] ? "cursor-pointer hover:bg-gray-100 border-dashed" : "border-solid"
+                                            } transition-all`}
+                                        >
+                                            {formData.images[index] ? (
+                                                <div className="relative w-full h-full">
+                                                    <img
+                                                        src={formData.images[index]}
+                                                        alt={`Product ${index + 1}`}
+                                                        className="w-full h-full object-cover rounded-md"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-md border-2 border-black hover:bg-red-600 shadow-sm"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            removeImage(index);
+                                                        }}
+                                                    >
+                                                        <X size={12} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center text-gray-400">
+                                                    <ImagePlus size={24} className="mx-auto mb-1 text-gray-500" />
+                                                    <span className="text-xs font-bold text-gray-500">Add Image</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-gray-500 font-bold mt-2">
+                                    Click to upload. Max 4 images.
+                                </p>
+                            </div>
+                        </div>
+
                         {/* Status */}
                         <div className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                             <div className="p-4 border-b-2 border-black bg-gray-50">

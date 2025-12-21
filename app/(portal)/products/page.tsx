@@ -376,8 +376,8 @@ export default function ProductsPage() {
                   transition={{ delay: index * 0.05 }}
                   className="bg-white border-2 border-[#2B1810] group hover:shadow-[4px_4px_0px_#2B1810] transition-shadow"
                 >
-                  {/* Product Image */}
-                  <div className="relative aspect-[3/4] overflow-hidden border-b-2 border-[#2B1810]">
+                  {/* Product Image - Clickable */}
+                  <Link href={`/products/${product.id}`} className="block relative aspect-[3/4] overflow-hidden border-b-2 border-[#2B1810] cursor-pointer">
                     {product.images?.[0] ? (
                       <Image
                         src={product.images[0]}
@@ -395,6 +395,7 @@ export default function ProductsPage() {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
+                        e.stopPropagation();
                         toggleWishlist(product);
                       }}
                       className={`absolute top-3 left-3 p-2 border-2 border-[#2B1810] transition-colors z-10 ${
@@ -416,7 +417,7 @@ export default function ProductsPage() {
                         Only {product.stock} left
                       </div>
                     )}
-                  </div>
+                  </Link>
 
                   {/* Product Info */}
                   <div className="p-4">
