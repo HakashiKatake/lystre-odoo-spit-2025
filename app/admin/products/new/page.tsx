@@ -104,7 +104,7 @@ export default function NewProductPage() {
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
-        // For now, convert to base64 data URLs (in production, you'd upload to a file server)
+        /// For now, convert to base64 data URLs (in production, you'd upload to a file server)
         Array.from(files).forEach((file) => {
             if (formData.images.length >= 4) {
                 toast.error("You can only upload up to 4 images per product.");
