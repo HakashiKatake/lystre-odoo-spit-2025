@@ -42,19 +42,14 @@ function RotatingBadge() {
 
 const CATEGORIES = [
   {
-    name: "Jewelry",
-    image:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    name: "Clothes",
+    name: "Women",
     image:
       "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop",
   },
   {
-    name: "RTW",
-    image:
-      "https://images.unsplash.com/photo-1550614000-4b9519e02339?q=80&w=1974&auto=format&fit=crop",
+    name: "Men",
+    image: "/images/men-category.jpg?v=2",
+    className: "object-top",
   },
 ];
 
@@ -151,11 +146,10 @@ export default function Home() {
               alt={`Hero ${currentHeroIndex + 1}`}
               fill
               sizes="100vw"
-              className={`w-full h-full ${
-                currentHeroIndex === 2
-                  ? "object-cover object-[center_10%]"
-                  : "object-cover"
-              }`}
+              className={`w-full h-full ${currentHeroIndex === 2
+                ? "object-cover object-[center_10%]"
+                : "object-cover"
+                }`}
               priority={currentHeroIndex === 0}
               quality={100}
               unoptimized
@@ -196,11 +190,10 @@ export default function Home() {
               key={index}
               onClick={() => setCurrentHeroIndex(index)}
               variant="outline"
-              className={`w-2 h-2 rounded-full p-0 min-w-0 transition-all duration-300 ${
-                index === currentHeroIndex
-                  ? "bg-white w-8"
-                  : "bg-white/50 hover:bg-white/75"
-              }`}
+              className={`w-2 h-2 rounded-full p-0 min-w-0 transition-all duration-300 ${index === currentHeroIndex
+                ? "bg-white w-8"
+                : "bg-white/50 hover:bg-white/75"
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
@@ -218,7 +211,7 @@ export default function Home() {
           animate={categoriesInView ? "visible" : "hidden"}
           variants={staggerContainer}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[80vh] md:h-[600px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[80vh] md:h-[600px]">
             {CATEGORIES.map((cat, i) => (
               <motion.div key={i} variants={fadeInUp}>
                 <Link
@@ -229,7 +222,8 @@ export default function Home() {
                     src={cat.image}
                     alt={cat.name}
                     fill
-                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-105"
+                    className={`object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-105 ${cat.className || ""
+                      }`}
                     unoptimized
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
@@ -332,13 +326,13 @@ export default function Home() {
         >
           {SIGNATURE_PRODUCTS.map((product, i) => (
             <motion.div key={i} variants={fadeInUp} className="w-full">
-              <Card className="w-full shadow-none hover:shadow-none">
-                <Card.Content className="pb-0 aspect-[3/4] overflow-hidden">
+              <Card className="w-full border-none shadow-none hover:shadow-lg transition-transform duration-300 hover:scale-105 bg-transparent group">
+                <Card.Content className="pb-0 aspect-[3/4] overflow-hidden relative">
                   <Image
                     src={product.image}
                     alt={`Lystré Signature ${i + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                     unoptimized
                   />
                 </Card.Content>
