@@ -15,6 +15,7 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 ## ✨ Features
 
 ### 🏪 Customer Portal
+
 - **Product Catalog** - Browse products with filters (category, type, material, price, color)
 - **Product Details** - View images, sizes, descriptions with zoom functionality
 - **Shopping Cart** - Add/remove items, quantity management, order summary
@@ -28,6 +29,7 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 - **Discounts** - Product-level discounts with strikethrough pricing
 
 ### 🔧 Admin Dashboard (Neobrutalism UI)
+
 - **Dashboard** - Revenue metrics, pending orders, quick actions
 - **Products** - CRUD operations, image management, pricing with discounts
 - **Contacts** - Customer & vendor management
@@ -45,18 +47,18 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 
 ## 🛠️ Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| **Framework** | Next.js 15 (App Router) |
-| **Language** | TypeScript |
-| **Styling** | TailwindCSS + Custom RetroUI Components |
-| **Database** | PostgreSQL |
-| **ORM** | Prisma 6 |
-| **State Management** | Zustand (with persistence) |
-| **Authentication** | JWT (Custom implementation) |
-| **UI Components** | Radix UI, Lucide Icons, Framer Motion |
-| **Charts** | Recharts |
-| **Notifications** | Sonner (Toast) |
+| Category             | Technology                              |
+| -------------------- | --------------------------------------- |
+| **Framework**        | Next.js 15 (App Router)                 |
+| **Language**         | TypeScript                              |
+| **Styling**          | TailwindCSS + Custom RetroUI Components |
+| **Database**         | Neon DB (Serverless PostgreSQL)         |
+| **ORM**              | Prisma 6                                |
+| **State Management** | Zustand (with persistence)              |
+| **Authentication**   | JWT (Custom implementation)             |
+| **UI Components**    | Radix UI, Lucide Icons, Framer Motion   |
+| **Charts**           | Recharts                                |
+| **Notifications**    | Sonner (Toast)                          |
 
 ---
 
@@ -102,46 +104,56 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or yarn
-- PostgreSQL database
+- Node.js 18+
+- npm or yarn
+- Neon DB Account
 
 ### Local Development
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/lystre.git
    cd lystre
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env` with your values:
+
    ```env
    DATABASE_URL="postgresql://user:password@localhost:5432/lystre"
    JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
    ```
 
 4. **Set up the database**
+
    ```bash
    npx prisma db push
    npx prisma generate
    ```
 
 5. **Seed initial data (optional)**
+
    ```bash
    npx prisma db seed
    ```
 
 6. **Start development server**
+
    ```bash
    npm run dev
    ```
@@ -179,6 +191,7 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 ### Step 2: Deploy to Vercel
 
 1. **Push your code to GitHub**
+
    ```bash
    git add .
    git commit -m "Ready for deployment"
@@ -195,13 +208,14 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 
 4. **Configure environment variables**
    - Before deploying, add these environment variables:
-   
-   | Variable | Value |
-   |----------|-------|
+
+   | Variable       | Value                               |
+   | -------------- | ----------------------------------- |
    | `DATABASE_URL` | Your Render PostgreSQL External URL |
-   | `JWT_SECRET` | A secure random string (32+ chars) |
-   
+   | `JWT_SECRET`   | A secure random string (32+ chars)  |
+
    > 💡 Generate a secure JWT secret:
+   >
    > ```bash
    > openssl rand -base64 32
    > ```
@@ -218,10 +232,11 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 
 7. **Initialize the database**
    - After deployment, run from your local machine:
+
      ```bash
      # Set the production DATABASE_URL temporarily
      export DATABASE_URL="your-render-postgresql-url"
-     
+
      # Push the schema to production
      npx prisma db push
      ```
@@ -244,12 +259,13 @@ Lystré is a modern, full-featured fashion e-commerce platform built with Next.j
 
 ## 🔧 Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | ✅ |
-| `JWT_SECRET` | Secret key for JWT tokens (32+ chars) | ✅ |
+| Variable       | Description                           | Required |
+| -------------- | ------------------------------------- | -------- |
+| `DATABASE_URL` | PostgreSQL connection string          | ✅       |
+| `JWT_SECRET`   | Secret key for JWT tokens (32+ chars) | ✅       |
 
 ### Example `.env` file
+
 ```env
 # Database (Render PostgreSQL)
 DATABASE_URL="postgresql://lystre_user:yourpassword@dpg-xxx.oregon-postgres.render.com:5432/lystre"
@@ -263,11 +279,13 @@ JWT_SECRET="your-super-secret-jwt-key-at-least-32-characters-long"
 ## 📝 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
 - `GET /api/auth/me` - Get current user
 
 ### Products
+
 - `GET /api/products` - List products
 - `POST /api/products` - Create product
 - `GET /api/products/[id]` - Get product
@@ -275,11 +293,13 @@ JWT_SECRET="your-super-secret-jwt-key-at-least-32-characters-long"
 - `DELETE /api/products/[id]` - Delete product
 
 ### Reviews
+
 - `GET /api/reviews?productId=xxx` - Get product reviews
 - `POST /api/reviews` - Create review
 - `POST /api/reviews/[id]/helpful` - Mark review helpful
 
 ### Orders
+
 - `GET /api/sale-orders` - List orders
 - `POST /api/sale-orders` - Create order
 - `GET /api/sale-orders/[id]` - Get order details
@@ -289,18 +309,16 @@ JWT_SECRET="your-super-secret-jwt-key-at-least-32-characters-long"
 ## 🎨 Design System
 
 ### Colors (Customer Portal)
+
 ```css
---primary: #8B7355      /* Warm Brown */
---secondary: #F5EBE0    /* Cream */
---accent: #2B1810       /* Dark Brown */
---background: #FFFEF9   /* Off White */
+--primary: #8b7355 /* Warm Brown */ --secondary: #f5ebe0 /* Cream */
+  --accent: #2b1810 /* Dark Brown */ --background: #fffef9 /* Off White */;
 ```
 
 ### Colors (Admin Dashboard - Neobrutalism)
+
 ```css
---lystre-brown: #8B7355
---border: #000000
---shadow: 4px 4px 0px rgba(0,0,0,1)
+--lystre-brown: #8b7355 --border: #000000 --shadow: 4px 4px 0px rgba(0, 0, 0, 1);
 ```
 
 ---
@@ -320,16 +338,19 @@ MIT License - feel free to use this project for your own purposes.
 ## 🐛 Troubleshooting
 
 ### Database Connection Issues
+
 ```bash
 # Test your database connection
 npx prisma db pull
 ```
 
 ### Build Errors on Vercel
+
 - Ensure `prisma generate` is in your build command
 - Check that all environment variables are set
 
 ### Prisma Client Issues
+
 ```bash
 # Regenerate the Prisma client
 rm -rf node_modules/.prisma
