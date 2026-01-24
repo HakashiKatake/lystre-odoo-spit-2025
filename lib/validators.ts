@@ -62,8 +62,8 @@ export const contactSchema = z.object({
 
 export const productSchema = z.object({
     name: z.string().min(2, 'Product name must be at least 2 characters'),
-    category: z.enum(['men', 'women', 'children']),
-    type: z.enum(['tshirt', 'shirt', 'kurta', 'formals', 'jeans', 'hoodies', 'sarees', 'nightwear', 'pant']),
+    category: z.enum(['men', 'women', 'children', 'traditional']),
+    type: z.enum(['tshirt', 'shirt', 'kurta', 'formals', 'jeans', 'hoodies', 'sarees', 'nightwear', 'pant', 'traditional']),
     material: z.enum(['cotton', 'nylon', 'polyester', 'wool', 'silk', 'linen']),
     colors: z.array(z.string()).min(1, 'Select at least one color'),
     stock: z.number().int().min(0, 'Stock cannot be negative'),

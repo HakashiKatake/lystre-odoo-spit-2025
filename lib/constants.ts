@@ -16,6 +16,7 @@ export const PRODUCT_TYPES = [
     { value: 'sarees', label: 'Sarees' },
     { value: 'nightwear', label: 'Nightwear' },
     { value: 'pant', label: 'Pants' },
+    { value: 'traditional', label: 'Traditional' },
 ] as const
 
 // Materials
