@@ -45,12 +45,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
-        <LenisProvider>
-          {children}
-        </LenisProvider>
-        <Toaster richColors position="top-right" />
+        <LenisProvider>{children}</LenisProvider>
+        <Toaster richColors position="bottom-right" duration={3000} />
       </body>
     </html>
   );
 }
-
